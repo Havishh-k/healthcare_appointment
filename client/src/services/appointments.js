@@ -4,12 +4,9 @@
  * API calls for booking, cancelling, and rescheduling.
  * 
  * Note: Database uses start_time/end_time columns for appointments.
- * Booking now goes through backend API to enable email notifications.
+ * Now uses Supabase directly for all operations.
  */
 import { supabase } from '@/lib/supabase';
-
-// Backend API base URL
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 // Default appointment duration in minutes
 const APPOINTMENT_DURATION = 30;
@@ -23,49 +20,71 @@ function calculateEndTime(startTime, durationMinutes = APPOINTMENT_DURATION) {
     return end.toISOString();
 }
 
-/**
- * Get auth headers for API requests
- */
-async function getAuthHeaders() {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.access_token) {
-        throw new Error('Not authenticated');
-    }
-    return {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
-    };
-}
-
 export async function bookAppointment(appointmentData) {
     const startTime = appointmentData.appointmentTime;
     const endTime = calculateEndTime(startTime);
 
     try {
-        const headers = await getAuthHeaders();
+        // Get current user
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (authError || !user) {
+            throw new Error('Not authenticated. Please log in again.');
+        }
 
-        const response = await fetch(`${API_URL}/appointments`, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify({
+        // Check if time slot is still available
+        const { data: existingAppointments, error: checkError } = await supabase
+            .from('appointments')
+            .select('id')
+            .eq('doctor_id', appointmentData.doctorId)
+            .neq('status', 'cancelled')
+            .or(`and(start_time.lt.${endTime},end_time.gt.${startTime})`);
+
+        if (checkError) {
+            console.error('Error checking availability:', checkError);
+        }
+
+        if (existingAppointments && existingAppointments.length > 0) {
+            throw new Error('This time slot is no longer available. Please select another time.');
+        }
+
+        // Insert appointment directly via Supabase
+        const { data, error } = await supabase
+            .from('appointments')
+            .insert({
+                patient_id: user.id,
                 doctor_id: appointmentData.doctorId,
                 department_id: appointmentData.departmentId,
                 start_time: startTime,
                 end_time: endTime,
                 reason: appointmentData.reason,
-                notes: appointmentData.notes,
-            }),
-        });
+                notes: appointmentData.notes || null,
+                status: 'pending',
+            })
+            .select(`
+                *,
+                doctor:doctors(
+                    *,
+                    user:users(full_name, email),
+                    department:departments(name)
+                )
+            `)
+            .single();
 
-        const result = await response.json();
-
-        if (!response.ok) {
-            throw new Error(result.error?.message || result.message || 'Failed to book appointment');
+        if (error) {
+            console.error('Supabase booking error:', error);
+            // Handle specific errors
+            if (error.code === '23505' || error.message.includes('overlap')) {
+                throw new Error('This time slot is no longer available. Please select another time.');
+            }
+            if (error.code === '42501' || error.message.includes('RLS')) {
+                throw new Error('Permission denied. Please try logging out and back in.');
+            }
+            throw new Error(error.message || 'Failed to book appointment');
         }
 
-        return result.data?.appointment || result.data;
+        return data;
     } catch (error) {
-        // Handle double-booking error gracefully
+        // Re-throw with user-friendly message
         if (error.message.includes('overlap') || error.message.includes('no longer available')) {
             throw new Error('This time slot is no longer available. Please select another time.');
         }
