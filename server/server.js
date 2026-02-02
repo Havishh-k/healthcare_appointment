@@ -28,10 +28,34 @@ app.set('trust proxy', 1);
 
 // Security middleware
 app.use(helmet());
+
+// CORS configuration - allow multiple origins
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://healthcare-appointment-sigma.vercel.app',
+    process.env.CORS_ORIGIN,
+].filter(Boolean);
+
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    origin: function (origin, callback) {
+        // Allow requests with no origin (mobile apps, Postman, etc.)
+        if (!origin) return callback(null, true);
+
+        if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            console.log('CORS blocked origin:', origin);
+            callback(null, true); // Allow anyway in production for now
+        }
+    },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
+
+// Handle preflight requests
+app.options('*', cors());
 
 // Rate limiting
 const limiter = rateLimit({
