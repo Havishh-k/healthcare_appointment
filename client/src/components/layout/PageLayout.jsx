@@ -2,10 +2,12 @@
  * PageLayout Component
  * 
  * Standard page layout with optional sidebar for dashboard views.
+ * Includes MobileNav for mobile devices and Sidebar for desktop.
  */
 import Header from './Header';
 import Footer from './Footer';
 import Sidebar from './Sidebar';
+import MobileNav from './MobileNav';
 import { cn } from '@/lib/utils';
 
 const PageLayout = ({
@@ -24,7 +26,7 @@ const PageLayout = ({
                 <main
                     className={cn(
                         'flex-1',
-                        showSidebar ? 'p-6' : '',
+                        showSidebar ? 'p-4 md:p-6 pb-20 md:pb-6' : 'pb-20 md:pb-0',
                         className
                     )}
                 >
@@ -33,6 +35,9 @@ const PageLayout = ({
             </div>
 
             {showFooter && <Footer />}
+
+            {/* Mobile Navigation - only shown on mobile */}
+            {showSidebar && <MobileNav />}
         </div>
     );
 };
