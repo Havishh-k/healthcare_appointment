@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: healthbook-api
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    rootDir: server
+    envVars:
+      - key: NODE_ENV
+        value: production
