@@ -3,7 +3,7 @@
  */
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { LandingLayout } from '@/components/layout';
+import { DashboardLayout } from '@/components/layout';
 import { getDoctors } from '@/services/doctors';
 import { getDepartments } from '@/services/departments';
 import { Card, Avatar, Badge, Button, Input, Select, Spinner, Alert } from '@/components/ui';
@@ -54,7 +54,7 @@ const Doctors = () => {
     ];
 
     return (
-        <LandingLayout>
+        <DashboardLayout>
             <div className="container-app py-12">
                 <div className="text-center mb-12">
                     <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -158,7 +158,7 @@ const Doctors = () => {
                     </div>
                 )}
             </div>
-        </LandingLayout>
+        </DashboardLayout>
     );
 };
 
