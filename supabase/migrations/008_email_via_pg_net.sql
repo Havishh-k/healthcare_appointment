@@ -148,27 +148,30 @@ AS $$
 DECLARE
     v_patient_email TEXT;
     v_patient_name TEXT;
+    v_doctor_email TEXT;
     v_doctor_name TEXT;
     v_department_name TEXT;
-    v_email_html TEXT;
+    v_patient_email_html TEXT;
+    v_doctor_email_html TEXT;
 BEGIN
     -- Get patient info
     SELECT email, full_name INTO v_patient_email, v_patient_name
     FROM public.users
     WHERE id = NEW.patient_id;
     
-    -- Get doctor and department info
+    -- Get doctor and department info (including doctor's email)
     SELECT 
         u.full_name,
+        u.email,
         COALESCE(d.name, 'General')
-    INTO v_doctor_name, v_department_name
+    INTO v_doctor_name, v_doctor_email, v_department_name
     FROM public.doctors doc
     LEFT JOIN public.users u ON doc.user_id = u.id
     LEFT JOIN public.departments d ON doc.department_id = d.id
     WHERE doc.id = NEW.doctor_id;
     
-    -- Generate email HTML
-    v_email_html := public.generate_patient_email_html(
+    -- Generate patient email HTML
+    v_patient_email_html := public.generate_patient_email_html(
         v_patient_name,
         v_doctor_name,
         v_department_name,
@@ -177,13 +180,54 @@ BEGIN
         NEW.id
     );
     
-    -- Send email (async via pg_net)
+    -- Send email to patient (async via pg_net)
     PERFORM public.send_email_via_resend(
         v_patient_email,
         'Appointment Confirmed - ' || to_char(NEW.start_time, 'Month DD, YYYY'),
-        v_email_html,
+        v_patient_email_html,
         NEW.id
     );
+    
+    -- Generate and send doctor notification email
+    IF v_doctor_email IS NOT NULL THEN
+        v_doctor_email_html := format(
+            '<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>New Appointment</title></head>
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f7fa;">
+<div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+<div style="background: linear-gradient(135deg, #10B981 0%%, #059669 100%%); padding: 30px; border-radius: 16px 16px 0 0; text-align: center;">
+<h1 style="color: white; margin: 0; font-size: 28px;">📅 New Appointment Booked</h1>
+</div>
+<div style="background: white; padding: 30px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+<p style="font-size: 16px; color: #374151;">Hi <strong>Dr. %s</strong>,</p>
+<p style="font-size: 16px; color: #374151;">A new appointment has been booked with you:</p>
+<div style="background: #F3F4F6; border-radius: 12px; padding: 20px; margin: 20px 0;">
+<p style="margin: 10px 0;"><strong>Patient:</strong> %s</p>
+<p style="margin: 10px 0;"><strong>Date:</strong> %s</p>
+<p style="margin: 10px 0;"><strong>Reason:</strong> %s</p>
+</div>
+<div style="text-align: center; margin-top: 30px;">
+<a href="https://healthcare-appointment-sigma.vercel.app/doctor/appointments" style="background: linear-gradient(135deg, #10B981 0%%, #059669 100%%); color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600;">View Schedule</a>
+</div>
+</div>
+</div>
+</body>
+</html>',
+            v_doctor_name,
+            v_patient_name,
+            to_char(NEW.start_time, 'Day, Month DD, YYYY at HH12:MI AM'),
+            COALESCE(NEW.reason, 'Consultation')
+        );
+        
+        -- Send email to doctor
+        PERFORM public.send_email_via_resend(
+            v_doctor_email,
+            'New Appointment: ' || v_patient_name || ' - ' || to_char(NEW.start_time, 'Month DD, YYYY'),
+            v_doctor_email_html,
+            NEW.id
+        );
+    END IF;
     
     RETURN NEW;
 EXCEPTION WHEN OTHERS THEN
@@ -203,3 +247,4 @@ CREATE TRIGGER trigger_appointment_email
 -- Grant necessary permissions
 GRANT USAGE ON SCHEMA net TO postgres, authenticated, service_role;
 GRANT EXECUTE ON FUNCTION net.http_post TO postgres, authenticated, service_role;
+
