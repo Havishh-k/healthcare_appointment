@@ -2,42 +2,48 @@
  * Doctor Availability Page
  * 
  * Manage working hours and availability.
+ * Uses Supabase directly to avoid CORS issues.
  */
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/lib/supabase';
 import { Card, CardHeader, CardContent, CardTitle, Button, Spinner, Alert } from '@/components/ui';
 import { Clock, Save, Plus, Trash2 } from 'lucide-react';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
 const DEFAULT_SLOT = { start: '09:00', end: '17:00' };
 
 const DoctorAvailability = () => {
-    const { session } = useAuth();
+    const { user } = useAuth();
+    const [doctorId, setDoctorId] = useState(null);
     const [availability, setAvailability] = useState({});
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
 
+    // Get doctor ID and availability on mount
     useEffect(() => {
-        const fetchAvailability = async () => {
-            try {
-                const token = session?.access_token;
-                if (!token) return;
-                const response = await fetch(`${API_URL}/doctor/availability`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
+        const fetchData = async () => {
+            if (!user) return;
 
-                if (response.ok) {
-                    const data = await response.json();
-                    setAvailability(data.data.availability || {});
+            try {
+                // Get doctor record
+                const { data: doctor, error: doctorError } = await supabase
+                    .from('doctors')
+                    .select('id, availability')
+                    .eq('user_id', user.id)
+                    .single();
+
+                if (doctorError || !doctor) {
+                    setError('Doctor profile not found');
+                    setLoading(false);
+                    return;
                 }
+
+                setDoctorId(doctor.id);
+                setAvailability(doctor.availability || {});
             } catch (err) {
                 setError('Failed to load availability');
             } finally {
@@ -45,29 +51,24 @@ const DoctorAvailability = () => {
             }
         };
 
-        if (session?.access_token) {
-            fetchAvailability();
-        }
-    }, [session]);
+        fetchData();
+    }, [user]);
 
     const handleSave = async () => {
+        if (!doctorId) return;
+
         try {
             setSaving(true);
             setError(null);
             setSuccess(false);
 
-            const token = session?.access_token;
-            const response = await fetch(`${API_URL}/doctor/availability`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ availability }),
-            });
+            const { error: updateError } = await supabase
+                .from('doctors')
+                .update({ availability })
+                .eq('id', doctorId);
 
-            if (!response.ok) {
-                throw new Error('Failed to save availability');
+            if (updateError) {
+                throw updateError;
             }
 
             setSuccess(true);

@@ -2,11 +2,13 @@
  * Appointment Detail Page
  * 
  * View and manage a single appointment with clinical notes.
+ * Uses Supabase directly to avoid CORS issues.
  */
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/lib/supabase';
 import { Card, CardHeader, CardContent, CardTitle, Badge, Button, Spinner, Avatar, Alert } from '@/components/ui';
 import {
     ArrowLeft,
@@ -21,12 +23,10 @@ import {
     Save,
 } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
 const AppointmentDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { session } = useAuth();
+    const { user } = useAuth();
     const [appointment, setAppointment] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -37,55 +37,57 @@ const AppointmentDetail = () => {
     useEffect(() => {
         const fetchAppointment = async () => {
             try {
-                const token = session?.access_token;
-                if (!token) return;
-                const response = await fetch(`${API_URL}/doctor/appointments/${id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
+                if (!user || !id) return;
 
-                if (!response.ok) {
-                    throw new Error('Appointment not found');
+                const { data, error: fetchError } = await supabase
+                    .from('appointments')
+                    .select(`
+                        *,
+                        patient:users!appointments_patient_id_fkey(id, full_name, email, phone)
+                    `)
+                    .eq('id', id)
+                    .single();
+
+                if (fetchError) {
+                    throw fetchError;
                 }
 
-                const data = await response.json();
-                setAppointment(data.data.appointment);
-                setNotes(data.data.appointment.clinical_notes || '');
+                setAppointment(data);
+                setNotes(data.clinical_notes || '');
             } catch (err) {
+                console.error('Error fetching appointment:', err);
                 setError(err.message);
             } finally {
                 setLoading(false);
             }
         };
 
-        if (session?.access_token && id) {
+        if (user && id) {
             fetchAppointment();
         }
-    }, [session, id]);
+    }, [user, id]);
 
     const handleStatusUpdate = async (newStatus) => {
         try {
             setActionLoading(true);
-            const token = session?.access_token;
 
-            const response = await fetch(`${API_URL}/doctor/appointments/${id}/status`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ status: newStatus }),
-            });
+            const { data, error } = await supabase
+                .from('appointments')
+                .update({ status: newStatus })
+                .eq('id', id)
+                .select(`
+                    *,
+                    patient:users!appointments_patient_id_fkey(id, full_name, email, phone)
+                `)
+                .single();
 
-            if (!response.ok) {
-                throw new Error('Failed to update status');
+            if (error) {
+                throw error;
             }
 
-            const data = await response.json();
-            setAppointment(data.data.appointment);
+            setAppointment(data);
         } catch (err) {
+            console.error('Status update error:', err);
             alert('Failed to update appointment status');
         } finally {
             setActionLoading(false);
@@ -95,25 +97,25 @@ const AppointmentDetail = () => {
     const handleSaveNotes = async () => {
         try {
             setSaving(true);
-            const token = session?.access_token;
 
-            const response = await fetch(`${API_URL}/doctor/appointments/${id}/notes`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ notes }),
-            });
+            const { data, error } = await supabase
+                .from('appointments')
+                .update({ clinical_notes: notes })
+                .eq('id', id)
+                .select(`
+                    *,
+                    patient:users!appointments_patient_id_fkey(id, full_name, email, phone)
+                `)
+                .single();
 
-            if (!response.ok) {
-                throw new Error('Failed to save notes');
+            if (error) {
+                throw error;
             }
 
-            const data = await response.json();
-            setAppointment(data.data.appointment);
+            setAppointment(data);
             alert('Notes saved successfully!');
         } catch (err) {
+            console.error('Save notes error:', err);
             alert('Failed to save notes');
         } finally {
             setSaving(false);

@@ -2,19 +2,19 @@
  * Doctor Schedule Page
  * 
  * Weekly calendar view of appointments.
+ * Uses Supabase directly to avoid CORS issues.
  */
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { format, startOfWeek, addDays, parseISO, isSameDay } from 'date-fns';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/lib/supabase';
 import { Card, CardHeader, CardContent, CardTitle, Badge, Button, Spinner, Avatar } from '@/components/ui';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
 const DoctorSchedule = () => {
-    const { session } = useAuth();
+    const { user } = useAuth();
     const [currentWeek, setCurrentWeek] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
     const [appointments, setAppointments] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -23,26 +23,40 @@ const DoctorSchedule = () => {
         const fetchAppointments = async () => {
             try {
                 setLoading(true);
-                const token = session?.access_token;
-                if (!token) return;
+                if (!user) return;
+
+                // Get doctor record for current user
+                const { data: doctor, error: doctorError } = await supabase
+                    .from('doctors')
+                    .select('id')
+                    .eq('user_id', user.id)
+                    .single();
+
+                if (doctorError || !doctor) {
+                    console.error('Doctor not found:', doctorError);
+                    return;
+                }
 
                 const startDate = currentWeek.toISOString();
                 const endDate = addDays(currentWeek, 7).toISOString();
 
-                const response = await fetch(
-                    `${API_URL}/doctor/appointments?start_date=${startDate}&end_date=${endDate}`,
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json',
-                        },
-                    }
-                );
+                const { data, error } = await supabase
+                    .from('appointments')
+                    .select(`
+                        *,
+                        patient:users!appointments_patient_id_fkey(id, full_name, email)
+                    `)
+                    .eq('doctor_id', doctor.id)
+                    .gte('start_time', startDate)
+                    .lte('start_time', endDate)
+                    .order('start_time', { ascending: true });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    setAppointments(data.data.appointments);
+                if (error) {
+                    console.error('Error fetching appointments:', error);
+                    return;
                 }
+
+                setAppointments(data || []);
             } catch (err) {
                 console.error('Failed to fetch schedule:', err);
             } finally {
@@ -50,10 +64,10 @@ const DoctorSchedule = () => {
             }
         };
 
-        if (session?.access_token) {
+        if (user) {
             fetchAppointments();
         }
-    }, [session, currentWeek]);
+    }, [user, currentWeek]);
 
     const weekDays = Array.from({ length: 7 }, (_, i) => addDays(currentWeek, i));
 

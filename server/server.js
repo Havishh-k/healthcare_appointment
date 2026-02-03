@@ -37,25 +37,28 @@ const allowedOrigins = [
     process.env.CORS_ORIGIN,
 ].filter(Boolean);
 
-app.use(cors({
+const corsOptions = {
     origin: function (origin, callback) {
         // Allow requests with no origin (mobile apps, Postman, etc.)
         if (!origin) return callback(null, true);
 
         if (allowedOrigins.includes(origin)) {
-            callback(null, true);
+            callback(null, origin); // Return the actual origin, not true
         } else {
-            console.log('CORS blocked origin:', origin);
-            callback(null, true); // Allow anyway in production for now
+            console.log('CORS allowing origin:', origin);
+            callback(null, origin); // Allow any origin for now in production
         }
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-}));
+    optionsSuccessStatus: 200, // Some legacy browsers choke on 204
+};
 
-// Handle preflight requests
-app.options('*', cors());
+app.use(cors(corsOptions));
+
+// Handle preflight requests explicitly
+app.options('*', cors(corsOptions));
 
 // Rate limiting
 const limiter = rateLimit({

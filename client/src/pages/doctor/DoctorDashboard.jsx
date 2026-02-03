@@ -2,11 +2,13 @@
  * Doctor Dashboard
  * 
  * Overview page for doctors showing today's appointments and stats.
+ * Now uses Supabase directly to avoid CORS issues.
  */
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, startOfDay, endOfDay } from 'date-fns';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/lib/supabase';
 import { Card, CardHeader, CardContent, CardTitle, Badge, Button, Spinner, Avatar } from '@/components/ui';
 import {
     Calendar,
@@ -17,35 +19,74 @@ import {
     ChevronRight,
 } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
 const DoctorDashboard = () => {
-    const { session } = useAuth();
+    const { user, profile } = useAuth();
     const [summary, setSummary] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchSummary = async () => {
+        const fetchDashboardData = async () => {
             try {
-                const token = session?.access_token;
-                if (!token) {
+                if (!user) {
                     throw new Error('Not authenticated');
                 }
 
-                const response = await fetch(`${API_URL}/doctor/dashboard/summary`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
+                // Get doctor record for current user
+                const { data: doctor, error: doctorError } = await supabase
+                    .from('doctors')
+                    .select('id')
+                    .eq('user_id', user.id)
+                    .single();
 
-                if (!response.ok) {
-                    throw new Error('Failed to fetch dashboard data');
+                if (doctorError || !doctor) {
+                    throw new Error('Doctor profile not found');
                 }
 
-                const data = await response.json();
-                setSummary(data.data);
+                const today = new Date();
+                const todayStart = startOfDay(today).toISOString();
+                const todayEnd = endOfDay(today).toISOString();
+
+                // Fetch today's appointments
+                const { data: todayAppointments, error: todayError } = await supabase
+                    .from('appointments')
+                    .select(`
+                        *,
+                        patient:users!appointments_patient_id_fkey(id, full_name, email)
+                    `)
+                    .eq('doctor_id', doctor.id)
+                    .gte('start_time', todayStart)
+                    .lte('start_time', todayEnd)
+                    .neq('status', 'cancelled')
+                    .order('start_time', { ascending: true });
+
+                if (todayError) {
+                    console.error('Error fetching today appointments:', todayError);
+                }
+
+                // Fetch stats
+                const { data: pendingAppointments } = await supabase
+                    .from('appointments')
+                    .select('id')
+                    .eq('doctor_id', doctor.id)
+                    .eq('status', 'pending');
+
+                const { data: upcomingAppointments } = await supabase
+                    .from('appointments')
+                    .select('id')
+                    .eq('doctor_id', doctor.id)
+                    .gte('start_time', new Date().toISOString())
+                    .neq('status', 'cancelled');
+
+                setSummary({
+                    todayAppointments: todayAppointments || [],
+                    stats: {
+                        todayTotal: todayAppointments?.length || 0,
+                        pending: pendingAppointments?.length || 0,
+                        upcoming: upcomingAppointments?.length || 0,
+                    }
+                });
+
             } catch (err) {
                 console.error('Dashboard fetch error:', err);
                 setError(err.message);
@@ -54,10 +95,10 @@ const DoctorDashboard = () => {
             }
         };
 
-        if (session?.access_token) {
-            fetchSummary();
+        if (user) {
+            fetchDashboardData();
         }
-    }, [session]);
+    }, [user]);
 
 
     const getStatusBadge = (status) => {

@@ -2,11 +2,13 @@
  * Doctor Appointments Page
  * 
  * List all appointments with filtering and actions.
+ * Uses Supabase directly to avoid CORS issues.
  */
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/lib/supabase';
 import { Card, CardHeader, CardContent, CardTitle, Badge, Button, Spinner, Avatar, Input } from '@/components/ui';
 import {
     Search,
@@ -18,10 +20,9 @@ import {
     AlertCircle,
 } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
 const DoctorAppointments = () => {
-    const { session } = useAuth();
+    const { user } = useAuth();
+    const [doctorId, setDoctorId] = useState(null);
     const [appointments, setAppointments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -29,31 +30,59 @@ const DoctorAppointments = () => {
     const [search, setSearch] = useState('');
     const [actionLoading, setActionLoading] = useState(null);
 
+    // Get doctor ID on mount
+    useEffect(() => {
+        const getDoctorId = async () => {
+            if (!user) return;
+
+            const { data: doctor, error } = await supabase
+                .from('doctors')
+                .select('id')
+                .eq('user_id', user.id)
+                .single();
+
+            if (error) {
+                console.error('Error getting doctor ID:', error);
+                setError('Doctor profile not found');
+                setLoading(false);
+                return;
+            }
+
+            setDoctorId(doctor.id);
+        };
+
+        getDoctorId();
+    }, [user]);
+
     const fetchAppointments = async () => {
+        if (!doctorId) return;
+
         try {
             setLoading(true);
-            const token = session?.access_token;
-            if (!token) return;
+            setError(null);
 
-            let url = `${API_URL}/doctor/appointments`;
+            let query = supabase
+                .from('appointments')
+                .select(`
+                    *,
+                    patient:users!appointments_patient_id_fkey(id, full_name, email)
+                `)
+                .eq('doctor_id', doctorId)
+                .order('start_time', { ascending: false });
+
             if (filter !== 'all') {
-                url += `?status=${filter}`;
+                query = query.eq('status', filter);
             }
 
-            const response = await fetch(url, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
+            const { data, error: fetchError } = await query;
 
-            if (!response.ok) {
-                throw new Error('Failed to fetch appointments');
+            if (fetchError) {
+                throw fetchError;
             }
 
-            const data = await response.json();
-            setAppointments(data.data.appointments);
+            setAppointments(data || []);
         } catch (err) {
+            console.error('Failed to fetch appointments:', err);
             setError(err.message);
         } finally {
             setLoading(false);
@@ -61,27 +90,22 @@ const DoctorAppointments = () => {
     };
 
     useEffect(() => {
-        if (session?.access_token) {
+        if (doctorId) {
             fetchAppointments();
         }
-    }, [session, filter]);
+    }, [doctorId, filter]);
 
     const handleStatusUpdate = async (id, newStatus) => {
         try {
             setActionLoading(id);
-            const token = session?.access_token;
 
-            const response = await fetch(`${API_URL}/doctor/appointments/${id}/status`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ status: newStatus }),
-            });
+            const { error } = await supabase
+                .from('appointments')
+                .update({ status: newStatus })
+                .eq('id', id);
 
-            if (!response.ok) {
-                throw new Error('Failed to update status');
+            if (error) {
+                throw error;
             }
 
             // Refresh appointments
