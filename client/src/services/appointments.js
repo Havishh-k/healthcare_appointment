@@ -5,9 +5,10 @@
  * 
  * Note: Database uses start_time/end_time columns for appointments.
  * Now uses Supabase directly for all operations.
- * Email notifications sent via Supabase Edge Functions.
+ * Email notifications sent directly via Resend API.
  */
 import { supabase } from '@/lib/supabase';
+import { sendBookingConfirmationEmails } from './emailService';
 
 // Default appointment duration in minutes
 const APPOINTMENT_DURATION = 30;
@@ -19,36 +20,6 @@ function calculateEndTime(startTime, durationMinutes = APPOINTMENT_DURATION) {
     const start = new Date(startTime);
     const end = new Date(start.getTime() + durationMinutes * 60 * 1000);
     return end.toISOString();
-}
-
-/**
- * Send booking confirmation emails via Supabase Edge Function
- */
-async function sendBookingEmails(appointment, patientEmail, patientName) {
-    try {
-        const { data, error } = await supabase.functions.invoke('send-booking-email', {
-            body: {
-                patientEmail: patientEmail,
-                patientName: patientName,
-                doctorEmail: appointment.doctor?.user?.email,
-                doctorName: appointment.doctor?.user?.full_name || 'Doctor',
-                departmentName: appointment.doctor?.department?.name || 'Department',
-                appointmentDate: appointment.start_time,
-                appointmentTime: appointment.start_time,
-                appointmentId: appointment.id,
-                reason: appointment.reason || 'Consultation',
-            },
-        });
-
-        if (error) {
-            console.error('Email notification error:', error);
-        } else {
-            console.log('Email notifications sent:', data);
-        }
-    } catch (error) {
-        // Don't fail the booking if email fails
-        console.error('Failed to send email notifications:', error);
-    }
 }
 
 export async function bookAppointment(appointmentData) {
@@ -123,7 +94,19 @@ export async function bookAppointment(appointmentData) {
         // Send email notifications asynchronously (don't block the booking)
         const patientEmail = profile?.email || user.email;
         const patientName = profile?.full_name || user.user_metadata?.full_name || 'Patient';
-        sendBookingEmails(data, patientEmail, patientName);
+
+        // Send emails using the new email service (Resend API directly)
+        sendBookingConfirmationEmails({
+            patientEmail: patientEmail,
+            patientName: patientName,
+            doctorEmail: data.doctor?.user?.email,
+            doctorName: data.doctor?.user?.full_name || 'Doctor',
+            departmentName: data.doctor?.department?.name || 'Department',
+            appointmentDate: data.start_time,
+            appointmentTime: data.start_time,
+            appointmentId: data.id,
+            reason: data.reason || 'Consultation',
+        });
 
         return data;
     } catch (error) {
