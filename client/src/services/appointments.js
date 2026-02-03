@@ -5,10 +5,9 @@
  * 
  * Note: Database uses start_time/end_time columns for appointments.
  * Now uses Supabase directly for all operations.
- * Email notifications sent directly via Resend API.
+ * Email notifications are sent via database trigger (pg_net) - no CORS issues.
  */
 import { supabase } from '@/lib/supabase';
-import { sendBookingConfirmationEmails } from './emailService';
 
 // Default appointment duration in minutes
 const APPOINTMENT_DURATION = 30;
@@ -91,22 +90,9 @@ export async function bookAppointment(appointmentData) {
             throw new Error(error.message || 'Failed to book appointment');
         }
 
-        // Send email notifications asynchronously (don't block the booking)
-        const patientEmail = profile?.email || user.email;
-        const patientName = profile?.full_name || user.user_metadata?.full_name || 'Patient';
-
-        // Send emails using the new email service (Resend API directly)
-        sendBookingConfirmationEmails({
-            patientEmail: patientEmail,
-            patientName: patientName,
-            doctorEmail: data.doctor?.user?.email,
-            doctorName: data.doctor?.user?.full_name || 'Doctor',
-            departmentName: data.doctor?.department?.name || 'Department',
-            appointmentDate: data.start_time,
-            appointmentTime: data.start_time,
-            appointmentId: data.id,
-            reason: data.reason || 'Consultation',
-        });
+        // Email is now sent automatically via database trigger (pg_net)
+        // No need to call email service from frontend - avoids CORS issues
+        console.log('Appointment booked, email sent via database trigger');
 
         return data;
     } catch (error) {
