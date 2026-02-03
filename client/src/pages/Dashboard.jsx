@@ -11,6 +11,7 @@ import { Card, CardHeader, CardContent, CardTitle, Badge, Button, Spinner } from
 import { Calendar, Clock, User, Plus, ArrowRight, CheckCircle, XCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getMyAppointments } from '@/services/appointments';
+import { formatDoctorName } from '@/utils/formatDoctorName';
 
 const Dashboard = () => {
     const { user, profile } = useAuth();
@@ -173,7 +174,7 @@ const Dashboard = () => {
                                             </div>
                                             <div>
                                                 <p className="font-medium">
-                                                    Dr. {apt.doctor?.user?.full_name || 'Unknown'}
+                                                    {formatDoctorName(apt.doctor?.user?.full_name)}
                                                 </p>
                                                 <p className="text-sm text-muted-foreground">
                                                     {apt.doctor?.specialization || apt.doctor?.department?.name || 'Specialist'}

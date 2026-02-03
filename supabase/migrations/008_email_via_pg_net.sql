@@ -66,7 +66,7 @@ BEGIN
             'Content-Type', 'application/json'
         ),
         body := jsonb_build_object(
-            'from', 'HealthBook <onboarding@resend.dev>',
+            'from', 'HealthBook <noreply@healthbook.com>',
             'to', ARRAY[p_to],
             'subject', p_subject,
             'html', p_html

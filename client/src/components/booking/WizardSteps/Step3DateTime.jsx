@@ -91,7 +91,7 @@ const Step3DateTime = () => {
     return (
         <div>
             {/* Header with Navigation */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
                 <Button
                     variant="outline"
                     size="sm"
@@ -101,11 +101,11 @@ const Step3DateTime = () => {
                     <ArrowLeft className="w-4 h-4" />
                     Back to Doctor
                 </Button>
-                <div className="text-right">
-                    <h2 className="text-2xl font-bold text-gray-900">
+                <div className="sm:text-right">
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                         Select Date & Time
                     </h2>
-                    <p className="text-gray-600">
+                    <p className="text-gray-600 text-sm sm:text-base">
                         Dr. {selection.doctor?.user?.full_name}
                     </p>
                 </div>
