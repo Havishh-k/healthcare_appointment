@@ -135,12 +135,12 @@ const DoctorDashboard = () => {
 
     return (
         <div className="space-y-6">
-            {/* Stats Grid */}
+            {/* Stats Grid - Animated */}
             <div className="grid sm:grid-cols-3 gap-4">
-                <Card>
+                <Card className="animate-jelly-pop jelly-hover" style={{ animationDelay: '0ms' }}>
                     <CardContent className="p-6">
                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                            <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center animate-jelly-bounce" style={{ animationDelay: '300ms' }}>
                                 <Calendar className="w-6 h-6 text-blue-600" />
                             </div>
                             <div>
@@ -151,10 +151,10 @@ const DoctorDashboard = () => {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="animate-jelly-pop jelly-hover" style={{ animationDelay: '100ms' }}>
                     <CardContent className="p-6">
                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-lg bg-yellow-100 flex items-center justify-center">
+                            <div className="w-12 h-12 rounded-lg bg-yellow-100 flex items-center justify-center animate-jelly-bounce" style={{ animationDelay: '400ms' }}>
                                 <Clock className="w-6 h-6 text-yellow-600" />
                             </div>
                             <div>
@@ -165,10 +165,10 @@ const DoctorDashboard = () => {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="animate-jelly-pop jelly-hover" style={{ animationDelay: '200ms' }}>
                     <CardContent className="p-6">
                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center">
+                            <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center animate-jelly-bounce" style={{ animationDelay: '500ms' }}>
                                 <CheckCircle className="w-6 h-6 text-green-600" />
                             </div>
                             <div>

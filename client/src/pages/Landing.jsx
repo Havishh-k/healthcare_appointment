@@ -63,21 +63,21 @@ const Landing = () => {
 
                 <div className="container-app relative z-10">
                     <div className="max-w-3xl mx-auto text-center space-y-8">
-                        <div className="space-y-4">
+                        <div className="space-y-4 animate-slide-up">
                             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
                                 Healthcare Appointments,{' '}
-                                <span className="text-primary">Simplified</span>
+                                <span className="text-primary animate-jelly-bounce inline-block" style={{ animationDelay: '500ms' }}>Simplified</span>
                             </h1>
-                            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
+                            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '300ms' }}>
                                 Book appointments with top doctors in minutes.
                                 No calls, no waiting. Just quality healthcare when you need it.
                             </p>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4 animate-jelly-pop" style={{ animationDelay: '400ms' }}>
                             <Button
                                 size="lg"
-                                className="w-full sm:w-auto gap-2"
+                                className="w-full sm:w-auto gap-2 jelly-hover"
                                 onClick={handleGetStarted}
                                 disabled={loading}
                             >
@@ -85,7 +85,7 @@ const Landing = () => {
                                 <ArrowRight className="h-4 w-4" />
                             </Button>
                             <Link to="/doctors">
-                                <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                                <Button variant="outline" size="lg" className="w-full sm:w-auto jelly-hover">
                                     Browse Doctors
                                 </Button>
                             </Link>
@@ -97,7 +97,7 @@ const Landing = () => {
             {/* Features Section */}
             <section className="py-24 border-t">
                 <div className="container-app">
-                    <div className="text-center space-y-4 mb-16">
+                    <div className="text-center space-y-4 mb-16 animate-slide-up">
                         <h2 className="text-3xl font-bold tracking-tight">
                             Why Choose HealthBook?
                         </h2>
@@ -110,9 +110,13 @@ const Landing = () => {
                         {features.map((feature, index) => {
                             const Icon = feature.icon;
                             return (
-                                <Card key={index} className="group hover:shadow-md transition-shadow">
+                                <Card
+                                    key={index}
+                                    className="group animate-jelly-pop jelly-hover cursor-pointer"
+                                    style={{ animationDelay: `${index * 100}ms` }}
+                                >
                                     <CardContent className="pt-6 text-center space-y-4">
-                                        <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto group-hover:bg-primary/20 transition-colors">
+                                        <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto group-hover:bg-primary/20 transition-colors animate-elastic" style={{ animationDelay: `${index * 100 + 300}ms` }}>
                                             <Icon className="w-6 h-6 text-primary" />
                                         </div>
                                         <h3 className="font-semibold">
@@ -131,8 +135,8 @@ const Landing = () => {
 
             {/* CTA Section */}
             <section className="py-24 bg-muted/30">
-                <div className="container-app text-center space-y-6">
-                    <h2 className="text-3xl font-bold tracking-tight">
+                <div className="container-app text-center space-y-6 animate-slide-up">
+                    <h2 className="text-3xl font-bold tracking-tight animate-wobble" style={{ animationDelay: '200ms' }}>
                         Ready to get started?
                     </h2>
                     <p className="text-muted-foreground max-w-xl mx-auto">
@@ -140,9 +144,10 @@ const Landing = () => {
                     </p>
                     <Button
                         size="lg"
-                        className="gap-2"
+                        className="gap-2 jelly-hover animate-jelly-pop"
                         onClick={handleGetStarted}
                         disabled={loading}
+                        style={{ animationDelay: '400ms' }}
                     >
                         {isAuthenticated ? 'Go to Dashboard' : 'Create Free Account'}
                         <ArrowRight className="h-4 w-4" />

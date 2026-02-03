@@ -114,7 +114,7 @@ const Dashboard = () => {
         <DashboardLayout>
             <div className="space-y-8">
                 {/* Welcome Section */}
-                <div className="space-y-1">
+                <div className="space-y-1 animate-slide-up">
                     <h1 className="text-2xl font-semibold tracking-tight">
                         Welcome back, {profile?.full_name?.split(' ')[0] || 'User'}!
                     </h1>
@@ -123,15 +123,19 @@ const Dashboard = () => {
                     </p>
                 </div>
 
-                {/* Stats Grid */}
+                {/* Stats Grid - Animated */}
                 <div className="grid sm:grid-cols-3 gap-4">
                     {statCards.map((stat, i) => {
                         const Icon = stat.icon;
                         return (
-                            <Card key={i}>
+                            <Card
+                                key={i}
+                                className={`animate-jelly-pop cursor-pointer jelly-hover`}
+                                style={{ animationDelay: `${i * 100}ms` }}
+                            >
                                 <CardContent className="p-6">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+                                        <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center animate-jelly-bounce" style={{ animationDelay: `${i * 150 + 300}ms` }}>
                                             <Icon className={`w-6 h-6 ${stat.color}`} />
                                         </div>
                                         <div>

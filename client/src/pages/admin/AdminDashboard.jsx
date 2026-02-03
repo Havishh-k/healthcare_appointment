@@ -120,15 +120,15 @@ const AdminDashboard = () => {
 
     return (
         <div>
-            {/* Header */}
-            <div className="mb-8">
+            {/* Header - Animated */}
+            <div className="mb-8 animate-slide-up">
                 <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
                 <p className="text-gray-500 mt-1">
                     Welcome back! Here's what's happening today.
                 </p>
             </div>
 
-            {/* Stats Grid */}
+            {/* Stats Grid - Animated */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <StatCard
                     title="Total Appointments"
