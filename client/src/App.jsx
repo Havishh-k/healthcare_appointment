@@ -48,114 +48,119 @@ import {
 // Chatbot - Patient only
 import PatientChatBubble from '@/components/chatbot/PatientChatBubble';
 
+// Error Boundary - fallback with logout
+import ErrorBoundary from '@/components/ErrorBoundary';
+
 function App() {
     return (
-        <BrowserRouter>
-            <AuthProvider>
-                <ToastProvider>
-                    <Routes>
-                        {/* Public Routes */}
-                        <Route path="/" element={<Landing />} />
-                        <Route path="/login" element={<LoginForm />} />
-                        <Route path="/register" element={<RegisterForm />} />
-                        <Route path="/forgot-password" element={<ForgotPasswordForm />} />
-                        <Route path="/doctors" element={<Doctors />} />
-                        <Route path="/departments" element={<Departments />} />
-                        <Route path="/about" element={<About />} />
+        <ErrorBoundary>
+            <BrowserRouter>
+                <AuthProvider>
+                    <ToastProvider>
+                        <Routes>
+                            {/* Public Routes */}
+                            <Route path="/" element={<Landing />} />
+                            <Route path="/login" element={<LoginForm />} />
+                            <Route path="/register" element={<RegisterForm />} />
+                            <Route path="/forgot-password" element={<ForgotPasswordForm />} />
+                            <Route path="/doctors" element={<Doctors />} />
+                            <Route path="/departments" element={<Departments />} />
+                            <Route path="/about" element={<About />} />
 
-                        {/* Protected Routes */}
-                        <Route
-                            path="/dashboard"
-                            element={
-                                <ProtectedRoute>
-                                    <Dashboard />
-                                </ProtectedRoute>
-                            }
-                        />
+                            {/* Protected Routes */}
+                            <Route
+                                path="/dashboard"
+                                element={
+                                    <ProtectedRoute>
+                                        <Dashboard />
+                                    </ProtectedRoute>
+                                }
+                            />
 
-                        {/* Booking Routes */}
-                        <Route
-                            path="/book"
-                            element={
-                                <ProtectedRoute>
-                                    <BookAppointment />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/appointments"
-                            element={
-                                <ProtectedRoute>
-                                    <Appointments />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/settings"
-                            element={
-                                <ProtectedRoute>
-                                    <Settings />
-                                </ProtectedRoute>
-                            }
-                        />
+                            {/* Booking Routes */}
+                            <Route
+                                path="/book"
+                                element={
+                                    <ProtectedRoute>
+                                        <BookAppointment />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/appointments"
+                                element={
+                                    <ProtectedRoute>
+                                        <Appointments />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/settings"
+                                element={
+                                    <ProtectedRoute>
+                                        <Settings />
+                                    </ProtectedRoute>
+                                }
+                            />
 
-                        {/* Doctor Portal Routes */}
-                        <Route path="/doctor" element={<DoctorLayout />}>
-                            <Route index element={<DoctorDashboard />} />
-                            <Route path="schedule" element={<DoctorSchedule />} />
-                            <Route path="appointments" element={<DoctorAppointments />} />
-                            <Route path="appointments/:id" element={<AppointmentDetail />} />
-                            <Route path="availability" element={<DoctorAvailability />} />
-                            <Route path="settings" element={<DoctorSettings />} />
-                        </Route>
+                            {/* Doctor Portal Routes */}
+                            <Route path="/doctor" element={<DoctorLayout />}>
+                                <Route index element={<DoctorDashboard />} />
+                                <Route path="schedule" element={<DoctorSchedule />} />
+                                <Route path="appointments" element={<DoctorAppointments />} />
+                                <Route path="appointments/:id" element={<AppointmentDetail />} />
+                                <Route path="availability" element={<DoctorAvailability />} />
+                                <Route path="settings" element={<DoctorSettings />} />
+                            </Route>
 
-                        {/* Admin Routes - Nested under AdminLayout */}
-                        <Route path="/admin" element={<AdminLayout />}>
-                            <Route index element={<AdminDashboard />} />
-                            <Route path="appointments" element={<AdminAppointments />} />
-                            <Route path="doctors" element={<AdminDoctors />} />
-                            <Route path="departments" element={<AdminDepartments />} />
-                            <Route path="patients" element={<AdminPatients />} />
-                        </Route>
+                            {/* Admin Routes - Nested under AdminLayout */}
+                            <Route path="/admin" element={<AdminLayout />}>
+                                <Route index element={<AdminDashboard />} />
+                                <Route path="appointments" element={<AdminAppointments />} />
+                                <Route path="doctors" element={<AdminDoctors />} />
+                                <Route path="departments" element={<AdminDepartments />} />
+                                <Route path="patients" element={<AdminPatients />} />
+                            </Route>
 
-                        {/* 404 */}
-                        <Route path="*" element={<NotFound />} />
-                    </Routes>
+                            {/* 404 */}
+                            <Route path="*" element={<NotFound />} />
+                        </Routes>
 
-                    {/* AI Chatbot - Patient portal only */}
-                    <PatientChatBubble />
+                        {/* AI Chatbot - Patient portal only */}
+                        <PatientChatBubble />
 
-                    {/* React Hot Toast - Beautiful notifications */}
-                    <Toaster
-                        position="top-right"
-                        toastOptions={{
-                            duration: 4000,
-                            style: {
-                                background: '#fff',
-                                color: '#363636',
-                                padding: '16px',
-                                borderRadius: '12px',
-                                boxShadow: '0 10px 40px rgba(0, 0, 0, 0.12)',
-                            },
-                            success: {
-                                duration: 3000,
+                        {/* React Hot Toast - Beautiful notifications */}
+                        <Toaster
+                            position="top-right"
+                            toastOptions={{
+                                duration: 4000,
                                 style: {
-                                    background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-                                    color: '#fff',
+                                    background: '#fff',
+                                    color: '#363636',
+                                    padding: '16px',
+                                    borderRadius: '12px',
+                                    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.12)',
                                 },
-                            },
-                            error: {
-                                duration: 5000,
-                                style: {
-                                    background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
-                                    color: '#fff',
+                                success: {
+                                    duration: 3000,
+                                    style: {
+                                        background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                                        color: '#fff',
+                                    },
                                 },
-                            },
-                        }}
-                    />
-                </ToastProvider>
-            </AuthProvider>
-        </BrowserRouter>
+                                error: {
+                                    duration: 5000,
+                                    style: {
+                                        background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
+                                        color: '#fff',
+                                    },
+                                },
+                            }}
+                        />
+                    </ToastProvider>
+                </AuthProvider>
+            </BrowserRouter>
+        </ErrorBoundary>
     );
 }
 

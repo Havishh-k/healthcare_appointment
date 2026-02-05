@@ -67,10 +67,13 @@ const DoctorLayout = () => {
                 />
             )}
 
-            {/* Sidebar */}
+            {/* Sidebar - Glass Effect */}
             <aside
                 className={cn(
-                    'fixed top-0 left-0 z-50 h-full w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 lg:translate-x-0',
+                    'fixed top-0 left-0 z-50 h-full w-64',
+                    'bg-gradient-to-b from-white/95 to-white/98 backdrop-blur-xl',
+                    'border-r border-gray-200/50 shadow-2xl lg:shadow-md',
+                    'transform transition-transform duration-200 lg:translate-x-0',
                     sidebarOpen ? 'translate-x-0' : '-translate-x-full'
                 )}
             >

@@ -59,7 +59,7 @@ const AdminSidebar = () => {
     const SidebarContent = () => (
         <>
             {/* Logo */}
-            <div className="p-4 sm:p-6 border-b border-gray-800 flex items-center justify-between">
+            <div className="p-4 sm:p-6 border-b border-white/10 flex items-center justify-between">
                 <div>
                     <h1 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
                         🏥 HealthBook
@@ -150,14 +150,16 @@ const AdminSidebar = () => {
                 />
             )}
 
-            {/* Sidebar - Desktop: always visible, Mobile: slide in/out */}
+            {/* Sidebar - Desktop: always visible, Mobile: slide in/out - Glass Effect */}
             <aside
                 className={`
                     fixed lg:static inset-y-0 left-0 z-50
                     w-64 sm:w-72 lg:w-64
-                    bg-gray-900 text-white 
+                    bg-gradient-to-b from-gray-900/95 to-gray-900/98 backdrop-blur-xl
+                    text-white border-r border-white/10
                     flex flex-col min-h-screen
                     transform transition-transform duration-300 ease-in-out
+                    shadow-2xl lg:shadow-none
                     ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
                 `}
             >
