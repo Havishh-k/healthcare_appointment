@@ -202,8 +202,9 @@ const DoctorAppointments = () => {
                 <div className="space-y-3">
                     {filteredAppointments.map((apt) => (
                         <Card key={apt.id} className="overflow-hidden">
-                            <div className="flex items-center p-4">
-                                <div className="flex items-center gap-4 flex-1">
+                            <div className="p-4 space-y-3">
+                                {/* Main row - patient info */}
+                                <div className="flex items-center gap-3">
                                     <Avatar name={apt.patient?.full_name} size="md" />
                                     <div className="flex-1 min-w-0">
                                         <p className="font-medium truncate">{apt.patient?.full_name}</p>
@@ -211,65 +212,66 @@ const DoctorAppointments = () => {
                                             {apt.reason || 'No reason provided'}
                                         </p>
                                     </div>
-                                </div>
-
-                                <div className="flex items-center gap-4">
-                                    <div className="text-right hidden sm:block">
-                                        <p className="font-medium">
-                                            {format(parseISO(apt.start_time), 'MMM d, yyyy')}
-                                        </p>
-                                        <p className="text-sm text-muted-foreground">
-                                            {format(parseISO(apt.start_time), 'h:mm a')}
-                                        </p>
-                                    </div>
-
-                                    <div className="hidden sm:block">
-                                        {getStatusBadge(apt.status)}
-                                    </div>
-
-                                    {/* Quick Actions */}
-                                    {apt.status === 'pending' && (
-                                        <div className="flex gap-2">
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                className="gap-1 text-green-600 border-green-200 hover:bg-green-50"
-                                                onClick={() => handleStatusUpdate(apt.id, 'confirmed')}
-                                                disabled={actionLoading === apt.id}
-                                            >
-                                                <Check className="w-4 h-4" />
-                                                Accept
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                className="gap-1 text-red-600 border-red-200 hover:bg-red-50"
-                                                onClick={() => handleStatusUpdate(apt.id, 'cancelled')}
-                                                disabled={actionLoading === apt.id}
-                                            >
-                                                <X className="w-4 h-4" />
-                                                Reject
-                                            </Button>
-                                        </div>
-                                    )}
-
-                                    {apt.status === 'confirmed' && (
-                                        <Button
-                                            size="sm"
-                                            className="gap-1"
-                                            onClick={() => handleStatusUpdate(apt.id, 'completed')}
-                                            disabled={actionLoading === apt.id}
-                                        >
-                                            <Check className="w-4 h-4" />
-                                            Complete
-                                        </Button>
-                                    )}
-
                                     <Link to={`/doctor/appointments/${apt.id}`}>
                                         <Button variant="ghost" size="icon">
                                             <ChevronRight className="w-5 h-5" />
                                         </Button>
                                     </Link>
+                                </div>
+
+                                {/* Second row - date, status, actions */}
+                                <div className="flex items-center justify-between pt-2 border-t">
+                                    <div className="flex items-center gap-3">
+                                        <div className="text-sm">
+                                            <p className="font-medium text-muted-foreground">
+                                                {format(parseISO(apt.start_time), 'MMM d, yyyy')}
+                                            </p>
+                                            <p className="text-muted-foreground">
+                                                {format(parseISO(apt.start_time), 'h:mm a')}
+                                            </p>
+                                        </div>
+                                        {getStatusBadge(apt.status)}
+                                    </div>
+
+                                    {/* Quick Actions */}
+                                    <div className="flex gap-2">
+                                        {apt.status === 'pending' && (
+                                            <>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="gap-1 text-green-600 border-green-200 hover:bg-green-50"
+                                                    onClick={() => handleStatusUpdate(apt.id, 'confirmed')}
+                                                    disabled={actionLoading === apt.id}
+                                                >
+                                                    <Check className="w-4 h-4" />
+                                                    <span className="hidden sm:inline">Accept</span>
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="gap-1 text-red-600 border-red-200 hover:bg-red-50"
+                                                    onClick={() => handleStatusUpdate(apt.id, 'cancelled')}
+                                                    disabled={actionLoading === apt.id}
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                    <span className="hidden sm:inline">Reject</span>
+                                                </Button>
+                                            </>
+                                        )}
+
+                                        {apt.status === 'confirmed' && (
+                                            <Button
+                                                size="sm"
+                                                className="gap-1"
+                                                onClick={() => handleStatusUpdate(apt.id, 'completed')}
+                                                disabled={actionLoading === apt.id}
+                                            >
+                                                <Check className="w-4 h-4" />
+                                                <span className="hidden sm:inline">Complete</span>
+                                            </Button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </Card>

@@ -135,49 +135,55 @@ const DoctorDashboard = () => {
 
     return (
         <div className="space-y-6">
-            {/* Stats Grid - Animated */}
+            {/* Stats Grid - Animated & Clickable */}
             <div className="grid sm:grid-cols-3 gap-4">
-                <Card className="animate-jelly-pop jelly-hover" style={{ animationDelay: '0ms' }}>
-                    <CardContent className="p-6">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center animate-jelly-bounce" style={{ animationDelay: '300ms' }}>
-                                <Calendar className="w-6 h-6 text-blue-600" />
+                <Link to="/doctor/appointments?filter=today">
+                    <Card className="animate-jelly-pop cursor-pointer hover:bg-muted/50 transition-colors" style={{ animationDelay: '0ms' }}>
+                        <CardContent className="p-6">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center animate-jelly-bounce" style={{ animationDelay: '300ms' }}>
+                                    <Calendar className="w-6 h-6 text-blue-600" />
+                                </div>
+                                <div>
+                                    <p className="text-2xl font-bold">{stats.todayTotal || 0}</p>
+                                    <p className="text-sm text-muted-foreground">Today's Patients</p>
+                                </div>
                             </div>
-                            <div>
-                                <p className="text-2xl font-bold">{stats.todayTotal || 0}</p>
-                                <p className="text-sm text-muted-foreground">Today's Patients</p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                        </CardContent>
+                    </Card>
+                </Link>
 
-                <Card className="animate-jelly-pop jelly-hover" style={{ animationDelay: '100ms' }}>
-                    <CardContent className="p-6">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-lg bg-yellow-100 flex items-center justify-center animate-jelly-bounce" style={{ animationDelay: '400ms' }}>
-                                <Clock className="w-6 h-6 text-yellow-600" />
+                <Link to="/doctor/appointments?filter=pending">
+                    <Card className="animate-jelly-pop cursor-pointer hover:bg-muted/50 transition-colors" style={{ animationDelay: '100ms' }}>
+                        <CardContent className="p-6">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-lg bg-yellow-100 flex items-center justify-center animate-jelly-bounce" style={{ animationDelay: '400ms' }}>
+                                    <Clock className="w-6 h-6 text-yellow-600" />
+                                </div>
+                                <div>
+                                    <p className="text-2xl font-bold">{stats.pending || 0}</p>
+                                    <p className="text-sm text-muted-foreground">Pending Requests</p>
+                                </div>
                             </div>
-                            <div>
-                                <p className="text-2xl font-bold">{stats.pending || 0}</p>
-                                <p className="text-sm text-muted-foreground">Pending Requests</p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                        </CardContent>
+                    </Card>
+                </Link>
 
-                <Card className="animate-jelly-pop jelly-hover" style={{ animationDelay: '200ms' }}>
-                    <CardContent className="p-6">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center animate-jelly-bounce" style={{ animationDelay: '500ms' }}>
-                                <CheckCircle className="w-6 h-6 text-green-600" />
+                <Link to="/doctor/appointments?filter=upcoming">
+                    <Card className="animate-jelly-pop cursor-pointer hover:bg-muted/50 transition-colors" style={{ animationDelay: '200ms' }}>
+                        <CardContent className="p-6">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center animate-jelly-bounce" style={{ animationDelay: '500ms' }}>
+                                    <CheckCircle className="w-6 h-6 text-green-600" />
+                                </div>
+                                <div>
+                                    <p className="text-2xl font-bold">{stats.upcoming || 0}</p>
+                                    <p className="text-sm text-muted-foreground">Upcoming</p>
+                                </div>
                             </div>
-                            <div>
-                                <p className="text-2xl font-bold">{stats.upcoming || 0}</p>
-                                <p className="text-sm text-muted-foreground">Upcoming</p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                        </CardContent>
+                    </Card>
+                </Link>
             </div>
 
             {/* Today's Appointments */}

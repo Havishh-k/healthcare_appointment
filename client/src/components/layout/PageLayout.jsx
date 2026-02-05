@@ -28,7 +28,7 @@ const PageLayout = ({
                     className={cn(
                         'flex-1',
                         // Add top padding for mobile header when sidebar is shown
-                        showSidebar ? 'pt-16 lg:pt-0 p-4 md:p-6 pb-20 md:pb-6' : 'pb-20 md:pb-0',
+                        showSidebar ? 'pt-20 lg:pt-6 px-4 pb-6 md:px-6' : 'pb-20 md:pb-0',
                         className
                     )}
                 >
