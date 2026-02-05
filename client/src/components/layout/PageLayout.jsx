@@ -37,9 +37,6 @@ const PageLayout = ({
             </div>
 
             {showFooter && <Footer />}
-
-            {/* Mobile Navigation - only shown on mobile */}
-            {showSidebar && <MobileNav />}
         </div>
     );
 };
