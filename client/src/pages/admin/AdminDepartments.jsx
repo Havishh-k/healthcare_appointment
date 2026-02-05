@@ -84,7 +84,7 @@ const AdminDepartments = () => {
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-8 animate-slide-up">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Departments</h1>
                     <p className="text-gray-500 mt-1">Manage medical departments</p>

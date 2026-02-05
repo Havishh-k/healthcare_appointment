@@ -73,7 +73,7 @@ const Departments = () => {
     return (
         <DashboardLayout>
             <div className="container-app py-12">
-                <div className="text-center mb-12">
+                <div className="text-center mb-12 animate-slide-up">
                     <h1 className="text-4xl font-bold text-gray-900 mb-4">
                         Medical Departments
                     </h1>
