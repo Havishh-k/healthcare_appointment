@@ -19,20 +19,20 @@ import {
 import { format, startOfToday, endOfToday } from 'date-fns';
 
 const StatCard = ({ title, value, icon: Icon, color, trend }) => (
-    <Card className="p-6">
-        <div className="flex items-center justify-between">
-            <div>
-                <p className="text-sm text-gray-500 mb-1">{title}</p>
-                <p className="text-3xl font-bold text-gray-900">{value}</p>
+    <Card className="p-3 sm:p-6 animate-jelly-pop jelly-hover">
+        <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm text-gray-500 mb-0.5 sm:mb-1 truncate">{title}</p>
+                <p className="text-xl sm:text-3xl font-bold text-gray-900">{value}</p>
                 {trend && (
-                    <p className="text-sm text-green-600 flex items-center gap-1 mt-1">
-                        <TrendingUp className="w-4 h-4" />
-                        {trend}
+                    <p className="text-xs sm:text-sm text-green-600 flex items-center gap-1 mt-0.5 sm:mt-1">
+                        <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                        <span className="truncate hidden sm:inline">{trend}</span>
                     </p>
                 )}
             </div>
-            <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${color}`}>
-                <Icon className="w-7 h-7 text-white" />
+            <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 ${color}`}>
+                <Icon className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
             </div>
         </div>
     </Card>
@@ -121,15 +121,15 @@ const AdminDashboard = () => {
     return (
         <div>
             {/* Header - Animated */}
-            <div className="mb-8 animate-slide-up">
-                <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-                <p className="text-gray-500 mt-1">
+            <div className="mb-6 sm:mb-8 animate-slide-up">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
+                <p className="text-sm sm:text-base text-gray-500 mt-1">
                     Welcome back! Here's what's happening today.
                 </p>
             </div>
 
             {/* Stats Grid - Animated */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
                 <StatCard
                     title="Total Appointments"
                     value={stats.totalAppointments}
@@ -160,8 +160,8 @@ const AdminDashboard = () => {
 
             {/* Today's Appointments */}
             <Card>
-                <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-gray-900">
+                <div className="p-4 sm:p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <h2 className="text-base sm:text-lg font-semibold text-gray-900">
                         Today's Appointments
                     </h2>
                     <Link to="/admin/appointments">
@@ -177,24 +177,24 @@ const AdminDashboard = () => {
                         </div>
                     ) : (
                         todayAppointments.slice(0, 5).map((apt) => (
-                            <div key={apt.id} className="p-4 flex items-center justify-between hover:bg-gray-50">
-                                <div className="flex items-center gap-4">
+                            <div key={apt.id} className="p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-gray-50">
+                                <div className="flex items-center gap-3 sm:gap-4">
                                     <Avatar name={apt.patient?.full_name || 'Patient'} size="md" />
-                                    <div>
-                                        <p className="font-medium text-gray-900">
+                                    <div className="min-w-0 flex-1">
+                                        <p className="font-medium text-gray-900 text-sm sm:text-base truncate">
                                             {apt.patient?.full_name || 'Patient'}
                                         </p>
-                                        <p className="text-sm text-gray-500">
+                                        <p className="text-xs sm:text-sm text-gray-500 truncate">
                                             Dr. {apt.doctor?.user?.full_name} • {apt.doctor?.specialization}
                                         </p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-4">
-                                    <div className="text-right">
-                                        <p className="text-sm font-medium text-gray-900">
+                                <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 ml-11 sm:ml-0">
+                                    <div className="text-left sm:text-right">
+                                        <p className="text-xs sm:text-sm font-medium text-gray-900">
                                             {format(new Date(apt.start_time), 'h:mm a')}
                                         </p>
-                                        <p className="text-xs text-gray-500">{apt.reason}</p>
+                                        <p className="text-xs text-gray-500 truncate max-w-[120px]">{apt.reason}</p>
                                     </div>
                                     <Badge
                                         variant={
