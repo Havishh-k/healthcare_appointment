@@ -107,9 +107,9 @@ const Dashboard = () => {
     };
 
     const statCards = [
-        { icon: Calendar, label: 'Upcoming', value: stats.upcoming, color: 'text-primary' },
-        { icon: CheckCircle, label: 'Completed', value: stats.completed, color: 'text-green-600' },
-        { icon: XCircle, label: 'Cancelled', value: stats.cancelled, color: 'text-red-500' },
+        { icon: Calendar, label: 'Upcoming', value: stats.upcoming, color: 'text-primary', link: '/appointments?status=pending' },
+        { icon: CheckCircle, label: 'Completed', value: stats.completed, color: 'text-green-600', link: '/appointments?status=completed' },
+        { icon: XCircle, label: 'Cancelled', value: stats.cancelled, color: 'text-red-500', link: '/appointments?status=cancelled' },
     ];
 
     if (loading) {
@@ -135,28 +135,29 @@ const Dashboard = () => {
                     </p>
                 </div>
 
-                {/* Stats Grid - Animated */}
+                {/* Stats Grid - Animated & Clickable */}
                 <div className="grid sm:grid-cols-3 gap-4">
                     {statCards.map((stat, i) => {
                         const Icon = stat.icon;
                         return (
-                            <Card
-                                key={i}
-                                className={`animate-jelly-pop cursor-pointer jelly-hover`}
-                                style={{ animationDelay: `${i * 100}ms` }}
-                            >
-                                <CardContent className="p-6">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center animate-jelly-bounce" style={{ animationDelay: `${i * 150 + 300}ms` }}>
-                                            <Icon className={`w-6 h-6 ${stat.color}`} />
+                            <Link key={i} to={stat.link}>
+                                <Card
+                                    className={`animate-jelly-pop cursor-pointer hover:bg-muted/50 transition-colors h-full`}
+                                    style={{ animationDelay: `${i * 100}ms` }}
+                                >
+                                    <CardContent className="p-6">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center animate-jelly-bounce" style={{ animationDelay: `${i * 150 + 300}ms` }}>
+                                                <Icon className={`w-6 h-6 ${stat.color}`} />
+                                            </div>
+                                            <div>
+                                                <p className="text-2xl font-bold">{stat.value}</p>
+                                                <p className="text-sm text-muted-foreground">{stat.label}</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-2xl font-bold">{stat.value}</p>
-                                            <p className="text-sm text-muted-foreground">{stat.label}</p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                                    </CardContent>
+                                </Card>
+                            </Link>
                         );
                     })}
                 </div>

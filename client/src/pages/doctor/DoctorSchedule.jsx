@@ -119,59 +119,61 @@ const DoctorSchedule = () => {
                 </div>
             </div>
 
-            {/* Calendar Grid */}
+            {/* Calendar Grid - Scrollable on mobile */}
             {loading ? (
                 <div className="flex justify-center py-12">
                     <Spinner size="lg" />
                 </div>
             ) : (
-                <div className="grid grid-cols-7 gap-2">
-                    {/* Day Headers */}
-                    {weekDays.map((day) => (
-                        <div
-                            key={day.toISOString()}
-                            className={cn(
-                                'text-center p-2 rounded-t-lg',
-                                isSameDay(day, new Date()) && 'bg-primary text-white'
-                            )}
-                        >
-                            <p className="font-medium">{format(day, 'EEE')}</p>
-                            <p className="text-2xl font-bold">{format(day, 'd')}</p>
-                        </div>
-                    ))}
-
-                    {/* Day Columns */}
-                    {weekDays.map((day) => {
-                        const dayAppointments = getAppointmentsForDay(day);
-                        return (
+                <div className="overflow-x-auto -mx-4 px-4 pb-4">
+                    <div className="grid grid-cols-7 gap-2 min-w-[700px]">
+                        {/* Day Headers */}
+                        {weekDays.map((day) => (
                             <div
-                                key={day.toISOString() + '-content'}
-                                className="min-h-[300px] bg-gray-50 rounded-b-lg p-2 space-y-2"
-                            >
-                                {dayAppointments.length === 0 ? (
-                                    <p className="text-xs text-muted-foreground text-center py-4">
-                                        No appointments
-                                    </p>
-                                ) : (
-                                    dayAppointments.map((apt) => (
-                                        <Link
-                                            key={apt.id}
-                                            to={`/doctor/appointments/${apt.id}`}
-                                            className={cn(
-                                                'block p-2 rounded border text-xs transition-transform hover:scale-105',
-                                                getStatusColor(apt.status)
-                                            )}
-                                        >
-                                            <p className="font-semibold truncate">
-                                                {format(parseISO(apt.start_time), 'h:mm a')}
-                                            </p>
-                                            <p className="truncate">{apt.patient?.full_name}</p>
-                                        </Link>
-                                    ))
+                                key={day.toISOString()}
+                                className={cn(
+                                    'text-center p-2 rounded-t-lg',
+                                    isSameDay(day, new Date()) && 'bg-primary text-white'
                                 )}
+                            >
+                                <p className="font-medium text-sm">{format(day, 'EEE')}</p>
+                                <p className="text-xl font-bold">{format(day, 'd')}</p>
                             </div>
-                        );
-                    })}
+                        ))}
+
+                        {/* Day Columns */}
+                        {weekDays.map((day) => {
+                            const dayAppointments = getAppointmentsForDay(day);
+                            return (
+                                <div
+                                    key={day.toISOString() + '-content'}
+                                    className="min-h-[200px] bg-gray-50 rounded-b-lg p-2 space-y-2"
+                                >
+                                    {dayAppointments.length === 0 ? (
+                                        <p className="text-xs text-muted-foreground text-center py-4">
+                                            No appts
+                                        </p>
+                                    ) : (
+                                        dayAppointments.map((apt) => (
+                                            <Link
+                                                key={apt.id}
+                                                to={`/doctor/appointments/${apt.id}`}
+                                                className={cn(
+                                                    'block p-2 rounded border text-xs transition-transform hover:scale-105',
+                                                    getStatusColor(apt.status)
+                                                )}
+                                            >
+                                                <p className="font-semibold truncate">
+                                                    {format(parseISO(apt.start_time), 'h:mm a')}
+                                                </p>
+                                                <p className="truncate">{apt.patient?.full_name?.split(' ')[0]}</p>
+                                            </Link>
+                                        ))
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
             )}
 
