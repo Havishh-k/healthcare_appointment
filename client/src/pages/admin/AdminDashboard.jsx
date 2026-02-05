@@ -4,7 +4,7 @@
  * Overview stats and today's appointments.
  */
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, Spinner, Badge, Button, Avatar } from '@/components/ui';
 import { supabase } from '@/lib/supabase';
 import {
@@ -18,25 +18,36 @@ import {
 } from 'lucide-react';
 import { format, startOfToday, endOfToday } from 'date-fns';
 
-const StatCard = ({ title, value, icon: Icon, color, trend }) => (
-    <Card className="p-3 sm:p-6 animate-jelly-pop jelly-hover">
-        <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm text-gray-500 mb-0.5 sm:mb-1 truncate">{title}</p>
-                <p className="text-xl sm:text-3xl font-bold text-gray-900">{value}</p>
-                {trend && (
-                    <p className="text-xs sm:text-sm text-green-600 flex items-center gap-1 mt-0.5 sm:mt-1">
-                        <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                        <span className="truncate hidden sm:inline">{trend}</span>
-                    </p>
-                )}
+const StatCard = ({ title, value, icon: Icon, color, trend, to }) => {
+    const navigate = useNavigate();
+
+    const handleClick = () => {
+        if (to) navigate(to);
+    };
+
+    return (
+        <Card
+            className={`p-3 sm:p-6 transition-transform duration-200 isolate ${to ? 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]' : ''}`}
+            onClick={handleClick}
+        >
+            <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm text-gray-500 mb-0.5 sm:mb-1 truncate">{title}</p>
+                    <p className="text-xl sm:text-3xl font-bold text-gray-900">{value}</p>
+                    {trend && (
+                        <p className="text-xs sm:text-sm text-green-600 flex items-center gap-1 mt-0.5 sm:mt-1">
+                            <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                            <span className="truncate hidden sm:inline">{trend}</span>
+                        </p>
+                    )}
+                </div>
+                <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 ${color}`}>
+                    <Icon className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
+                </div>
             </div>
-            <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 ${color}`}>
-                <Icon className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
-            </div>
-        </div>
-    </Card>
-);
+        </Card>
+    );
+};
 
 const AdminDashboard = () => {
     const [stats, setStats] = useState(null);
@@ -128,7 +139,7 @@ const AdminDashboard = () => {
                 </p>
             </div>
 
-            {/* Stats Grid - Animated */}
+            {/* Stats Grid */}
             <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
                 <StatCard
                     title="Total Appointments"
@@ -136,12 +147,14 @@ const AdminDashboard = () => {
                     icon={Calendar}
                     color="bg-primary-500"
                     trend="+12% from last month"
+                    to="/admin/appointments"
                 />
                 <StatCard
                     title="Active Doctors"
                     value={stats.totalDoctors}
                     icon={Users}
                     color="bg-secondary-500"
+                    to="/admin/doctors"
                 />
                 <StatCard
                     title="Registered Patients"
@@ -149,12 +162,14 @@ const AdminDashboard = () => {
                     icon={UserCircle}
                     color="bg-purple-500"
                     trend="+8% from last month"
+                    to="/admin/patients"
                 />
                 <StatCard
                     title="Today's Appointments"
                     value={stats.todayAppointments}
                     icon={Clock}
                     color="bg-orange-500"
+                    to="/admin/appointments"
                 />
             </div>
 
