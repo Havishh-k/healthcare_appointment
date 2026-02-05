@@ -652,29 +652,50 @@ select {
 
 /* Jelly animation utility classes */
 .animate-jelly {
-  animation: jelly 0.6s ease-in-out;
+  animation: jelly 0.8s ease-in-out;
 }
 
+/* Smooth jelly pop - no opacity/scale initial state to prevent disappearing on tap */
 .animate-jelly-pop {
-  opacity: 0;
-  transform: scale(0);
-  animation: jellyPop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  animation: jellyPopSmooth 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes jellyPopSmooth {
+  0% {
+    transform: scale(0.85);
+  }
+
+  40% {
+    transform: scale(1.05);
+  }
+
+  60% {
+    transform: scale(0.97);
+  }
+
+  80% {
+    transform: scale(1.02);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 .animate-jelly-bounce {
-  animation: jellyBounce 0.8s ease-in-out forwards;
+  animation: jellyBounce 1s ease-in-out forwards;
 }
 
 .animate-elastic {
-  animation: elasticScale 0.6s ease-out forwards;
+  animation: elasticScale 0.8s ease-out forwards;
 }
 
 .animate-rubber {
-  animation: rubberBand 0.8s ease-out forwards;
+  animation: rubberBand 1s ease-out forwards;
 }
 
 .animate-wobble {
-  animation: wobble 0.8s ease-in-out forwards;
+  animation: wobble 1s ease-in-out forwards;
 }
 
 /* Jelly hover effects */

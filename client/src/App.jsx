@@ -45,8 +45,8 @@ import {
     DoctorSettings,
 } from '@/pages/doctor';
 
-// Chatbot
-import { ChatBubble } from '@/components/chatbot';
+// Chatbot - Patient only
+import PatientChatBubble from '@/components/chatbot/PatientChatBubble';
 
 function App() {
     return (
@@ -122,8 +122,8 @@ function App() {
                         <Route path="*" element={<NotFound />} />
                     </Routes>
 
-                    {/* AI Chatbot - Show for authenticated users */}
-                    <ChatBubble />
+                    {/* AI Chatbot - Patient portal only */}
+                    <PatientChatBubble />
 
                     {/* React Hot Toast - Beautiful notifications */}
                     <Toaster
