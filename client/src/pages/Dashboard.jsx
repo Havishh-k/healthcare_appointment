@@ -2,6 +2,7 @@
  * Dashboard Page - Real Data Integration
  * 
  * User dashboard with real appointments from the database.
+ * Redirects admin and doctor users to their respective portals.
  */
 import { useState, useEffect } from 'react';
 import { format, parseISO } from 'date-fns';
@@ -9,12 +10,23 @@ import { DashboardLayout } from '@/components/layout';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardHeader, CardContent, CardTitle, Badge, Button, Spinner } from '@/components/ui';
 import { Calendar, Clock, User, Plus, ArrowRight, CheckCircle, XCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { getMyAppointments } from '@/services/appointments';
 import { formatDoctorName } from '@/utils/formatDoctorName';
 
 const Dashboard = () => {
-    const { user, profile } = useAuth();
+    const { user, profile, loading: authLoading } = useAuth();
+
+    // Redirect admin users to admin portal
+    if (!authLoading && profile?.role === 'admin') {
+        return <Navigate to="/admin" replace />;
+    }
+
+    // Redirect doctor users to doctor portal
+    if (!authLoading && profile?.role === 'doctor') {
+        return <Navigate to="/doctor" replace />;
+    }
+
     const [appointments, setAppointments] = useState([]);
     const [stats, setStats] = useState({
         upcoming: 0,
