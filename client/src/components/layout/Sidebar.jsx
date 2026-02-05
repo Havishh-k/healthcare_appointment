@@ -1,114 +1,180 @@
 /**
- * Sidebar Component
+ * Patient Sidebar Navigation - Mobile Responsive with Glass Effects
  * 
- * Collapsible sidebar for dashboard with role-based menu items.
+ * Unified sidebar style matching admin portal.
  */
-import { useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { cn } from '@/lib/utils';
+import { useState, useEffect } from 'react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { Avatar, Button } from '@/components/ui';
 import {
     LayoutDashboard,
     Calendar,
-    Users,
     Stethoscope,
     Building2,
-    Clock,
     Settings,
-    ChevronLeft,
-    ChevronRight,
+    LogOut,
+    Menu,
+    X,
+    Heart,
 } from 'lucide-react';
 
+const navItems = [
+    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', end: true },
+    { to: '/appointments', icon: Calendar, label: 'My Appointments' },
+    { to: '/doctors', icon: Stethoscope, label: 'Find Doctors' },
+    { to: '/departments', icon: Building2, label: 'Departments' },
+    { to: '/settings', icon: Settings, label: 'Settings' },
+];
+
 const Sidebar = ({ className }) => {
-    const [collapsed, setCollapsed] = useState(false);
-    const { role } = useAuth();
+    const { signOut, profile } = useAuth();
+    const navigate = useNavigate();
+    const [isMobileOpen, setIsMobileOpen] = useState(false);
     const location = useLocation();
 
-    // Role-based menu items
-    const menuItems = {
-        patient: [
-            { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
-            { icon: Calendar, label: 'My Appointments', href: '/appointments' },
-            { icon: Stethoscope, label: 'Find Doctors', href: '/doctors' },
-            { icon: Building2, label: 'Departments', href: '/departments' },
-            { icon: Settings, label: 'Settings', href: '/settings' },
-        ],
-        doctor: [
-            { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
-            { icon: Calendar, label: 'Appointments', href: '/appointments' },
-            { icon: Clock, label: 'My Schedule', href: '/schedule' },
-            { icon: Users, label: 'Patients', href: '/patients' },
-            { icon: Settings, label: 'Settings', href: '/settings' },
-        ],
-        admin: [
-            { icon: LayoutDashboard, label: 'Dashboard', href: '/admin' },
-            { icon: Users, label: 'Users', href: '/admin/users' },
-            { icon: Stethoscope, label: 'Doctors', href: '/admin/doctors' },
-            { icon: Building2, label: 'Departments', href: '/admin/departments' },
-            { icon: Calendar, label: 'Appointments', href: '/admin/appointments' },
-            { icon: Settings, label: 'Settings', href: '/admin/settings' },
-        ],
+    // Close sidebar on route change (mobile)
+    useEffect(() => {
+        setIsMobileOpen(false);
+    }, [location.pathname]);
+
+    // Close sidebar on escape key
+    useEffect(() => {
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') setIsMobileOpen(false);
+        };
+        document.addEventListener('keydown', handleEscape);
+        return () => document.removeEventListener('keydown', handleEscape);
+    }, []);
+
+    // Prevent body scroll when mobile menu is open
+    useEffect(() => {
+        if (isMobileOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isMobileOpen]);
+
+    const handleLogout = async () => {
+        await signOut();
+        navigate('/');
     };
 
-    const items = menuItems[role] || menuItems.patient;
+    const SidebarContent = () => (
+        <>
+            {/* Logo */}
+            <div className="p-4 sm:p-6 border-b border-primary-600/20 flex items-center justify-between">
+                <div>
+                    <h1 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                        <Heart className="w-5 h-5 text-pink-400" />
+                        HealthBook
+                    </h1>
+                    <p className="text-xs text-primary-200 mt-1">Patient Portal</p>
+                </div>
+                {/* Close button - mobile only */}
+                <button
+                    onClick={() => setIsMobileOpen(false)}
+                    className="lg:hidden p-2 text-primary-200 hover:text-white hover:bg-primary-700/50 rounded-lg transition-colors"
+                    aria-label="Close menu"
+                >
+                    <X className="w-5 h-5" />
+                </button>
+            </div>
+
+            {/* Navigation */}
+            <nav className="flex-1 p-3 sm:p-4 overflow-y-auto">
+                <div className="space-y-1">
+                    {navItems.map((item) => (
+                        <NavLink
+                            key={item.to}
+                            to={item.to}
+                            end={item.end}
+                            onClick={() => setIsMobileOpen(false)}
+                            className={({ isActive }) =>
+                                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive
+                                    ? 'bg-white/20 text-white shadow-lg'
+                                    : 'text-primary-100 hover:bg-white/10 hover:text-white'
+                                }`
+                            }
+                        >
+                            <item.icon className="w-5 h-5" />
+                            {item.label}
+                        </NavLink>
+                    ))}
+                </div>
+            </nav>
+
+            {/* User section */}
+            <div className="p-4 border-t border-primary-600/20">
+                <div className="flex items-center gap-3 mb-3">
+                    <Avatar name={profile?.full_name} size="sm" />
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-white truncate">
+                            {profile?.full_name || 'User'}
+                        </p>
+                        <p className="text-xs text-primary-200 truncate">
+                            {profile?.email}
+                        </p>
+                    </div>
+                </div>
+                <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-primary-100 hover:bg-white/10 hover:text-white transition-colors text-sm"
+                >
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                </button>
+            </div>
+        </>
+    );
 
     return (
-        <aside
-            className={cn(
-                'hidden md:flex bg-white border-r border-gray-100 h-screen sticky top-16 transition-all duration-300',
-                collapsed ? 'w-16' : 'w-64',
-                className
-            )}
-        >
-            <div className="flex flex-col h-full">
-                {/* Navigation */}
-                <nav className="flex-1 p-3 space-y-1">
-                    {items.map((item) => {
-                        const Icon = item.icon;
-                        const isActive = location.pathname === item.href;
-
-                        return (
-                            <NavLink
-                                key={item.href}
-                                to={item.href}
-                                className={cn(
-                                    'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
-                                    'hover:bg-gray-50',
-                                    isActive && 'bg-primary-50 text-primary-700 font-medium'
-                                )}
-                            >
-                                <Icon
-                                    className={cn(
-                                        'w-5 h-5 flex-shrink-0',
-                                        isActive ? 'text-primary-600' : 'text-gray-500'
-                                    )}
-                                />
-                                {!collapsed && (
-                                    <span className="text-sm">{item.label}</span>
-                                )}
-                            </NavLink>
-                        );
-                    })}
-                </nav>
-
-                {/* Collapse Toggle */}
-                <div className="p-3 border-t border-gray-100">
-                    <button
-                        onClick={() => setCollapsed(!collapsed)}
-                        className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-gray-500 hover:bg-gray-50 transition-colors"
-                    >
-                        {collapsed ? (
-                            <ChevronRight className="w-5 h-5" />
-                        ) : (
-                            <>
-                                <ChevronLeft className="w-5 h-5" />
-                                <span className="text-sm">Collapse</span>
-                            </>
-                        )}
-                    </button>
-                </div>
+        <>
+            {/* Mobile Header Bar */}
+            <div className="lg:hidden fixed top-0 left-0 right-0 z-40 h-16 bg-gradient-to-r from-primary-600 to-primary-700 backdrop-blur-xl flex items-center justify-between px-4 shadow-lg">
+                <button
+                    onClick={() => setIsMobileOpen(true)}
+                    className="p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
+                    aria-label="Open menu"
+                >
+                    <Menu className="w-6 h-6" />
+                </button>
+                <h1 className="text-lg font-bold text-white flex items-center gap-2">
+                    <Heart className="w-5 h-5 text-pink-300" />
+                    HealthBook
+                </h1>
+                <div className="w-10" /> {/* Spacer for centering */}
             </div>
-        </aside>
+
+            {/* Mobile Overlay */}
+            {isMobileOpen && (
+                <div
+                    className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity"
+                    onClick={() => setIsMobileOpen(false)}
+                />
+            )}
+
+            {/* Sidebar - Desktop: always visible, Mobile: slide in/out - Glass Effect */}
+            <aside
+                className={`
+                    fixed lg:static inset-y-0 left-0 z-50
+                    w-64 sm:w-72 lg:w-64
+                    bg-gradient-to-b from-primary-600/95 via-primary-700/95 to-primary-800/98 backdrop-blur-xl
+                    text-white border-r border-white/10
+                    flex flex-col min-h-screen
+                    transform transition-transform duration-300 ease-in-out
+                    shadow-2xl lg:shadow-none
+                    ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                    ${className}
+                `}
+            >
+                <SidebarContent />
+            </aside>
+        </>
     );
 };
 
