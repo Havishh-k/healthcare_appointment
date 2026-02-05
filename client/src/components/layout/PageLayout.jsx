@@ -18,7 +18,8 @@ const PageLayout = ({
 }) => {
     return (
         <div className="min-h-screen flex flex-col bg-gray-50">
-            <Header />
+            {/* Only show Header when NOT in sidebar/dashboard mode */}
+            {!showSidebar && <Header />}
 
             <div className="flex-1 flex">
                 {showSidebar && <Sidebar />}
@@ -26,7 +27,8 @@ const PageLayout = ({
                 <main
                     className={cn(
                         'flex-1',
-                        showSidebar ? 'p-4 md:p-6 pb-20 md:pb-6' : 'pb-20 md:pb-0',
+                        // Add top padding for mobile header when sidebar is shown
+                        showSidebar ? 'pt-16 lg:pt-0 p-4 md:p-6 pb-20 md:pb-6' : 'pb-20 md:pb-0',
                         className
                     )}
                 >
