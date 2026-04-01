@@ -4,13 +4,14 @@
 import { useState, useEffect } from 'react';
 import { Card, Spinner, Input, Avatar, Badge } from '@/components/ui';
 import { supabase } from '@/lib/supabase';
-import { Search, Mail, Phone, Calendar } from 'lucide-react';
+import { Search, Mail, Phone, Calendar, ChevronDown } from 'lucide-react';
 import { format } from 'date-fns';
 
 const AdminPatients = () => {
     const [patients, setPatients] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [expandedId, setExpandedId] = useState(null);
 
     useEffect(() => {
         fetchPatients();
@@ -70,70 +71,62 @@ const AdminPatients = () => {
                     No patients found.
                 </Card>
             ) : (
-                <Card>
-                    <div className="overflow-x-auto -mx-4 sm:mx-0">
-                        <table className="w-full min-w-[600px]">
-                            <thead className="bg-gray-50 border-b border-gray-200">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Patient
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Contact
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Joined
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Status
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200">
-                                {filteredPatients.map((patient) => (
-                                    <tr key={patient.id} className="hover:bg-gray-50">
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center gap-3">
-                                                <Avatar name={patient.full_name} size="md" />
-                                                <div>
-                                                    <p className="font-medium text-gray-900">
-                                                        {patient.full_name}
-                                                    </p>
-                                                    <p className="text-sm text-gray-500">
-                                                        ID: {patient.id.slice(0, 8)}...
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="space-y-1">
-                                                <p className="text-sm text-gray-600 flex items-center gap-2">
-                                                    <Mail className="w-4 h-4 text-gray-400" />
+                <div className="space-y-3">
+                    {filteredPatients.map((patient) => {
+                        const isExpanded = expandedId === patient.id;
+                        return (
+                            <Card key={patient.id} className="overflow-hidden">
+                                {/* Collapsed Header */}
+                                <div
+                                    className="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                                    onClick={() => setExpandedId(isExpanded ? null : patient.id)}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                                            <Avatar name={patient.full_name} size="md" />
+                                            <div className="min-w-0 flex-1">
+                                                <p className="font-medium text-gray-900 truncate">
+                                                    {patient.full_name}
+                                                </p>
+                                                <p className="text-sm text-gray-500 truncate">
                                                     {patient.email}
                                                 </p>
-                                                {patient.phone && (
-                                                    <p className="text-sm text-gray-600 flex items-center gap-2">
-                                                        <Phone className="w-4 h-4 text-gray-400" />
-                                                        {patient.phone}
-                                                    </p>
-                                                )}
                                             </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <p className="text-sm text-gray-600 flex items-center gap-2">
-                                                <Calendar className="w-4 h-4 text-gray-400" />
-                                                {format(new Date(patient.created_at), 'MMM d, yyyy')}
-                                            </p>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
+                                        </div>
+                                        <div className="flex items-center gap-3">
                                             <Badge variant="success">Active</Badge>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </Card>
+                                            <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Expanded Details */}
+                                {isExpanded && (
+                                    <div className="px-4 pb-4 pt-0 border-t bg-gray-50 space-y-3">
+                                        <div className="pt-3">
+                                            <p className="text-xs text-gray-500 uppercase mb-1">Patient ID</p>
+                                            <p className="text-sm text-gray-900 font-mono">{patient.id}</p>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <Mail className="w-4 h-4 text-gray-400" />
+                                            <span>{patient.email}</span>
+                                        </div>
+                                        {patient.phone && (
+                                            <div className="flex items-center gap-2 text-sm">
+                                                <Phone className="w-4 h-4 text-gray-400" />
+                                                <span>{patient.phone}</span>
+                                            </div>
+                                        )}
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <Calendar className="w-4 h-4 text-gray-400" />
+                                            <span>Joined {format(new Date(patient.created_at), 'MMM d, yyyy')}</span>
+                                        </div>
+                                    </div>
+                                )}
+                            </Card>
+                        );
+                    })}
+                </div>
             )}
         </div>
     );
