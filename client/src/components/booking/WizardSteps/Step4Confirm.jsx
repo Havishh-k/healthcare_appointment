@@ -3,6 +3,7 @@
  */
 import { useState } from 'react';
 import { format, parseISO } from 'date-fns';
+import { getLocalTimeFromUTC } from '@/lib/utils';
 import { useBooking } from '@/contexts/BookingContext';
 import { useAuth } from '@/hooks/useAuth';
 import { bookAppointment } from '@/services/appointments';
@@ -17,7 +18,7 @@ const Step4Confirm = () => {
     const [reason, setReason] = useState(selection.reason || '');
     const [notes, setNotes] = useState(selection.notes || '');
 
-    const appointmentTime = selection.timeSlot ? parseISO(selection.timeSlot) : null;
+    const appointmentTime = selection.timeSlot ? getLocalTimeFromUTC(selection.timeSlot) : null;
 
     const handleSubmit = async () => {
         if (!reason.trim()) {

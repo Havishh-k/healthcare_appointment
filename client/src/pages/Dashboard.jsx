@@ -1,3 +1,4 @@
+import { getLocalTimeFromUTC } from '@/lib/utils';
 /**
  * Dashboard Page - Real Data Integration
  * 
@@ -49,7 +50,7 @@ const Dashboard = () => {
                 const now = new Date();
                 const upcomingCount = data.filter(apt =>
                     ['pending', 'confirmed'].includes(apt.status) &&
-                    new Date(apt.start_time) > now
+                    getLocalTimeFromUTC(apt.start_time) > now
                 ).length;
                 const completedCount = data.filter(apt => apt.status === 'completed').length;
                 const cancelledCount = data.filter(apt => apt.status === 'cancelled').length;
@@ -58,7 +59,7 @@ const Dashboard = () => {
                 const upcomingAppointments = data
                     .filter(apt =>
                         ['pending', 'confirmed'].includes(apt.status) &&
-                        new Date(apt.start_time) > now
+                        getLocalTimeFromUTC(apt.start_time) > now
                     )
                     .sort((a, b) => new Date(a.start_time) - new Date(b.start_time))
                     .slice(0, 5); // Show max 5 upcoming
@@ -92,7 +93,7 @@ const Dashboard = () => {
 
     const formatAppointmentDate = (dateString) => {
         try {
-            return format(parseISO(dateString), 'MMM d, yyyy');
+            return format(getLocalTimeFromUTC(dateString), 'MMM d, yyyy');
         } catch {
             return dateString;
         }
@@ -100,7 +101,7 @@ const Dashboard = () => {
 
     const formatAppointmentTime = (dateString) => {
         try {
-            return format(parseISO(dateString), 'h:mm a');
+            return format(getLocalTimeFromUTC(dateString), 'h:mm a');
         } catch {
             return '';
         }

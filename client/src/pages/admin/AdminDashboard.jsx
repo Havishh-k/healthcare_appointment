@@ -1,3 +1,4 @@
+import { getLocalTimeFromUTC } from '@/lib/utils';
 /**
  * Admin Dashboard Page
  * 
@@ -207,7 +208,7 @@ const AdminDashboard = () => {
                                 <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 ml-11 sm:ml-0">
                                     <div className="text-left sm:text-right">
                                         <p className="text-xs sm:text-sm font-medium text-gray-900">
-                                            {format(new Date(apt.start_time), 'h:mm a')}
+                                            {format(getLocalTimeFromUTC(apt.start_time), 'h:mm a')}
                                         </p>
                                         <p className="text-xs text-gray-500 truncate max-w-[120px]">{apt.reason}</p>
                                     </div>

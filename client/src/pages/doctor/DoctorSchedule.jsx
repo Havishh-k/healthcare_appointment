@@ -11,7 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 import { Card, CardHeader, CardContent, CardTitle, Badge, Button, Spinner, Avatar } from '@/components/ui';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, getLocalTimeFromUTC } from '@/lib/utils';
 
 const DoctorSchedule = () => {
     const { user } = useAuth();
@@ -72,7 +72,7 @@ const DoctorSchedule = () => {
     const weekDays = Array.from({ length: 7 }, (_, i) => addDays(currentWeek, i));
 
     const getAppointmentsForDay = (date) => {
-        return appointments.filter((apt) => isSameDay(parseISO(apt.start_time), date));
+        return appointments.filter((apt) => isSameDay(getLocalTimeFromUTC(apt.start_time), date));
     };
 
     const getStatusColor = (status) => {
@@ -164,7 +164,7 @@ const DoctorSchedule = () => {
                                                 )}
                                             >
                                                 <p className="font-semibold truncate">
-                                                    {format(parseISO(apt.start_time), 'h:mm a')}
+                                                    {format(getLocalTimeFromUTC(apt.start_time), 'h:mm a')}
                                                 </p>
                                                 <p className="truncate">{apt.patient?.full_name?.split(' ')[0]}</p>
                                             </Link>

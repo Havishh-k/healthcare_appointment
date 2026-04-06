@@ -1,3 +1,4 @@
+import { getLocalTimeFromUTC } from '@/lib/utils';
 /**
  * Admin Appointments Page
  * 
@@ -172,11 +173,11 @@ const AdminAppointments = () => {
                                         <div className="grid grid-cols-2 gap-4 pt-3">
                                             <div className="flex items-center gap-2 text-sm">
                                                 <Calendar className="w-4 h-4 text-gray-400" />
-                                                <span>{format(new Date(apt.start_time), 'MMM d, yyyy')}</span>
+                                                <span>{format(getLocalTimeFromUTC(apt.start_time), 'MMM d, yyyy')}</span>
                                             </div>
                                             <div className="flex items-center gap-2 text-sm">
                                                 <Clock className="w-4 h-4 text-gray-400" />
-                                                <span>{format(new Date(apt.start_time), 'h:mm a')}</span>
+                                                <span>{format(getLocalTimeFromUTC(apt.start_time), 'h:mm a')}</span>
                                             </div>
                                         </div>
                                         <div>

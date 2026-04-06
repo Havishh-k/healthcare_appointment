@@ -1,3 +1,4 @@
+import { getLocalTimeFromUTC } from '@/lib/utils';
 /**
  * Doctor Dashboard
  * 
@@ -217,7 +218,7 @@ const DoctorDashboard = () => {
                                     </div>
                                     <div className="text-right">
                                         <p className="font-medium">
-                                            {format(parseISO(apt.start_time), 'h:mm a')}
+                                            {format(getLocalTimeFromUTC(apt.start_time), 'h:mm a')}
                                         </p>
                                         {getStatusBadge(apt.status)}
                                     </div>

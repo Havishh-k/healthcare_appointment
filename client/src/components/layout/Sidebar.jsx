@@ -17,6 +17,8 @@ import {
     Menu,
     X,
     Heart,
+    Activity,
+    TrendingUp,
 } from 'lucide-react';
 
 const navItems = [
@@ -24,6 +26,8 @@ const navItems = [
     { to: '/appointments', icon: Calendar, label: 'My Appointments' },
     { to: '/doctors', icon: Stethoscope, label: 'Find Doctors' },
     { to: '/departments', icon: Building2, label: 'Departments' },
+    { to: '/risk-assessment', icon: Activity, label: 'Risk Assessment' },
+    { to: '/vitals', icon: TrendingUp, label: 'Health Trends' },
     { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 

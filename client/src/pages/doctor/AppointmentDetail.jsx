@@ -1,3 +1,4 @@
+import { getLocalTimeFromUTC } from '@/lib/utils';
 /**
  * Appointment Detail Page
  * 
@@ -213,14 +214,14 @@ const AppointmentDetail = () => {
                         <div>
                             <p className="text-sm text-muted-foreground">Date</p>
                             <p className="font-medium">
-                                {format(parseISO(appointment.start_time), 'EEEE, MMMM d, yyyy')}
+                                {format(getLocalTimeFromUTC(appointment.start_time), 'EEEE, MMMM d, yyyy')}
                             </p>
                         </div>
                         <div>
                             <p className="text-sm text-muted-foreground">Time</p>
                             <p className="font-medium flex items-center gap-2">
                                 <Clock className="w-4 h-4" />
-                                {format(parseISO(appointment.start_time), 'h:mm a')}
+                                {format(getLocalTimeFromUTC(appointment.start_time), 'h:mm a')}
                             </p>
                         </div>
                         <div className="sm:col-span-2">

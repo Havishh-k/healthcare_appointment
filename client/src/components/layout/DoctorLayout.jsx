@@ -180,7 +180,7 @@ const DoctorLayout = () => {
             {/* Sidebar - Glass Effect */}
             <aside
                 className={`
-                    fixed lg:static inset-y-0 left-0 z-50
+                    fixed lg:fixed inset-y-0 left-0 z-50
                     w-64 sm:w-72 lg:w-64
                     bg-gradient-to-b from-gray-800/95 via-gray-900/95 to-gray-900/98 backdrop-blur-xl
                     text-white border-r border-white/10

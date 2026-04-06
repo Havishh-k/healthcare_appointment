@@ -5,7 +5,7 @@ import { format, parseISO, isPast } from 'date-fns';
 import { Card, Badge, Avatar, Button } from '@/components/ui';
 import { Calendar, Clock, MapPin, MoreVertical } from 'lucide-react';
 import { useState } from 'react';
-import { cn } from '@/lib/utils';
+import { cn, getLocalTimeFromUTC } from '@/lib/utils';
 
 const statusConfig = {
     pending: { variant: 'warning', label: 'Pending' },
@@ -18,7 +18,7 @@ const AppointmentCard = ({ appointment, onReschedule, onCancel }) => {
     const [menuOpen, setMenuOpen] = useState(false);
 
     // Use start_time column (database schema)
-    const appointmentTime = parseISO(appointment.start_time);
+    const appointmentTime = getLocalTimeFromUTC(appointment.start_time);
     const isPastAppointment = isPast(appointmentTime);
     const status = statusConfig[appointment.status] || statusConfig.pending;
     const doctor = appointment.doctor;

@@ -1,3 +1,4 @@
+import { getLocalTimeFromUTC } from '@/lib/utils';
 /**
  * Doctor Appointments Page
  * 
@@ -18,6 +19,8 @@ import {
     Check,
     X,
     AlertCircle,
+    Brain,
+    Activity,
 } from 'lucide-react';
 
 const DoctorAppointments = () => {
@@ -29,6 +32,7 @@ const DoctorAppointments = () => {
     const [filter, setFilter] = useState('all');
     const [search, setSearch] = useState('');
     const [actionLoading, setActionLoading] = useState(null);
+    const [riskData, setRiskData] = useState({});  // { patientId: assessment }
 
     // Get doctor ID on mount
     useEffect(() => {
@@ -94,6 +98,30 @@ const DoctorAppointments = () => {
             fetchAppointments();
         }
     }, [doctorId, filter]);
+
+    // Fetch risk assessments for all patients in view
+    useEffect(() => {
+        const fetchRisks = async () => {
+            if (!appointments.length) return;
+            const patientIds = [...new Set(appointments.map((a) => a.patient?.id).filter(Boolean))];
+            if (!patientIds.length) return;
+
+            const { data } = await supabase
+                .from('health_assessments')
+                .select('*')
+                .in('patient_id', patientIds)
+                .order('created_at', { ascending: false });
+
+            if (data) {
+                const map = {};
+                data.forEach((r) => {
+                    if (!map[r.patient_id]) map[r.patient_id] = r; // keep latest
+                });
+                setRiskData(map);
+            }
+        };
+        fetchRisks();
+    }, [appointments]);
 
     const handleStatusUpdate = async (id, newStatus) => {
         try {
@@ -219,15 +247,48 @@ const DoctorAppointments = () => {
                                     </Link>
                                 </div>
 
+                                {/* AI Risk Alert */}
+                                {(() => {
+                                    const risk = riskData[apt.patient?.id];
+                                    if (!risk || risk.risk_level === 'low') return null;
+                                    const isHigh = risk.risk_level === 'high';
+                                    return (
+                                        <div className={`flex items-start gap-3 p-3 rounded-lg border ${
+                                            isHigh
+                                                ? 'bg-red-50 border-red-200'
+                                                : 'bg-amber-50 border-amber-200'
+                                        }`}>
+                                            <Brain className={`w-5 h-5 mt-0.5 shrink-0 ${
+                                                isHigh ? 'text-red-500' : 'text-amber-500'
+                                            }`} />
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className={`text-sm font-semibold ${
+                                                        isHigh ? 'text-red-700' : 'text-amber-700'
+                                                    }`}>
+                                                        AI Alert: {risk.risk_level === 'high' ? 'High' : 'Moderate'} Cardiovascular Risk
+                                                    </span>
+                                                    <Badge variant={isHigh ? 'destructive' : 'warning'}>
+                                                        {Number(risk.risk_score).toFixed(0)}%
+                                                    </Badge>
+                                                </div>
+                                                {risk.recommendations?.slice(0, 2).map((rec, i) => (
+                                                    <p key={i} className="text-xs text-gray-600">• {rec}</p>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+
                                 {/* Second row - date, status, actions */}
                                 <div className="flex items-center justify-between pt-2 border-t">
                                     <div className="flex items-center gap-3">
                                         <div className="text-sm">
                                             <p className="font-medium text-muted-foreground">
-                                                {format(parseISO(apt.start_time), 'MMM d, yyyy')}
+                                                {format(getLocalTimeFromUTC(apt.start_time), 'MMM d, yyyy')}
                                             </p>
                                             <p className="text-muted-foreground">
-                                                {format(parseISO(apt.start_time), 'h:mm a')}
+                                                {format(getLocalTimeFromUTC(apt.start_time), 'h:mm a')}
                                             </p>
                                         </div>
                                         {getStatusBadge(apt.status)}

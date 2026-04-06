@@ -20,6 +20,8 @@ import Doctors from '@/pages/Doctors';
 import Departments from '@/pages/Departments';
 import About from '@/pages/About';
 import Settings from '@/pages/Settings';
+import HealthRiskAssessment from '@/pages/HealthRiskAssessment';
+import PatientVitals from '@/pages/PatientVitals';
 
 // Auth pages
 import LoginForm from '@/components/auth/LoginForm';
@@ -99,6 +101,22 @@ function App() {
                                 element={
                                     <ProtectedRoute>
                                         <Settings />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/risk-assessment"
+                                element={
+                                    <ProtectedRoute>
+                                        <HealthRiskAssessment />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/vitals"
+                                element={
+                                    <ProtectedRoute>
+                                        <PatientVitals />
                                     </ProtectedRoute>
                                 }
                             />

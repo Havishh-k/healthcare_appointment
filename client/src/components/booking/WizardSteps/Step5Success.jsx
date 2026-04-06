@@ -2,6 +2,7 @@
  * Step 5: Booking Success
  */
 import { format, parseISO } from 'date-fns';
+import { getLocalTimeFromUTC } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 import { useBooking } from '@/contexts/BookingContext';
 import { Button, Card, Avatar } from '@/components/ui';
@@ -9,7 +10,7 @@ import { CheckCircle, Calendar, Clock, Download, Home } from 'lucide-react';
 
 const Step5Success = () => {
     const { selection, reset } = useBooking();
-    const appointmentTime = selection.timeSlot ? parseISO(selection.timeSlot) : null;
+    const appointmentTime = selection.timeSlot ? getLocalTimeFromUTC(selection.timeSlot) : null;
 
     return (
         <div className="max-w-lg mx-auto text-center">

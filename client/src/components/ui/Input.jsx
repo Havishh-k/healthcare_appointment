@@ -7,7 +7,7 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 const Input = React.forwardRef(
-    ({ className, type, label, error, ...props }, ref) => {
+    ({ className, type, label, error, leftIcon, ...props }, ref) => {
         const id = props.id || props.name || React.useId();
 
         return (
