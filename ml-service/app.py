@@ -12,6 +12,8 @@ from pydantic import BaseModel, Field
 import joblib
 import numpy as np
 import os
+import json
+from groq import Groq
 
 # ---------------------------------------------------------------------------
 # App setup
@@ -45,6 +47,13 @@ if os.path.isfile(MODEL_PATH):
 else:
     print(f"[!] No model found at {MODEL_PATH}. Run `python train.py` first.")
 
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+try:
+    groq_client = Groq(api_key=GROQ_API_KEY)
+except Exception as e:
+    print(f"[!] Groq initialization failed: {e}")
+    groq_client = None
+
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -70,6 +79,14 @@ class RiskOutput(BaseModel):
     message: str
     recommendations: list[str]
     bmi: float
+
+class VoiceTriageInput(BaseModel):
+    transcript: str
+
+class VoiceTriageOutput(BaseModel):
+    target_specialty: str
+    preferred_time: str
+    context_brief: str
 
 
 # ---------------------------------------------------------------------------
@@ -174,3 +191,44 @@ def health_check():
         "service": "HealthBook ML Risk Prediction",
         "model_loaded": model is not None,
     }
+
+@app.post("/voice-triage", response_model=VoiceTriageOutput)
+def voice_triage(data: VoiceTriageInput):
+    if groq_client is None:
+        raise HTTPException(status_code=500, detail="Groq client is not initialized")
+        
+    prompt = f"""
+    You are an intelligent medical triage assistant.
+    Analyze the following patient transcript and extract:
+    1. target_specialty: The medical department required (e.g., Neurologist, Cardiologist, General Physician).
+    2. preferred_time: The requested time if any (e.g., "tomorrow morning", "anytime", "next week"). If not mentioned, return "anytime".
+    3. context_brief: A professional, concise summary of the patient's symptoms based on the transcript.
+    
+    Transcript: "{data.transcript}"
+    
+    Return pure JSON with exact keys: "target_specialty", "preferred_time", "context_brief".
+    """
+    
+    try:
+        chat_completion = groq_client.chat.completions.create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt,
+                }
+            ],
+            model="llama-3.1-8b-instant",
+            response_format={"type": "json_object"},
+        )
+        
+        result_str = chat_completion.choices[0].message.content
+        result = json.loads(result_str)
+        
+        return VoiceTriageOutput(
+            target_specialty=result.get("target_specialty", "General Physician"),
+            preferred_time=result.get("preferred_time", "anytime"),
+            context_brief=result.get("context_brief", data.transcript)
+        )
+    except Exception as e:
+        print(f"Groq API Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

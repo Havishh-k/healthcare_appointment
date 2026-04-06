@@ -21,6 +21,7 @@ import {
     AlertCircle,
     Brain,
     Activity,
+    Mic,
 } from 'lucide-react';
 
 const DoctorAppointments = () => {

@@ -266,7 +266,7 @@ export async function getQuickReplies(userId) {
 /**
  * Book appointment via chatbot - uses Supabase directly
  */
-export async function bookAppointment({ userId, doctorId, datetime, department, reason }) {
+export async function bookAppointment({ userId, doctorId, datetime, department, reason, context_brief }) {
     try {
         // Get current user
         const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -299,6 +299,7 @@ export async function bookAppointment({ userId, doctorId, datetime, department, 
                 start_time: startTime.toISOString(),
                 end_time: endTime.toISOString(),
                 reason: reason || 'Consultation',
+                context_brief: context_brief || null,
                 status: 'pending'
             })
             .select()
